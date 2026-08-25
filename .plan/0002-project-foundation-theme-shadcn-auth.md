@@ -3,7 +3,7 @@
 - **Status:** Scoped
 - **Branch:** `feature/0002-project-foundation`
 - **Issue:** [#1](https://github.com/elitale/coldsocial/issues/1)
-- **PR:** #<pending>
+- **PR:** [#2](https://github.com/elitale/coldsocial/pull/2)
 - **ICP persona:** All three (Priya, Marcus, Sofia) — every ICP must sign in before any
   content feature exists. This is the enabling foundation the rest of the loop builds on.
 

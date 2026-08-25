@@ -21,7 +21,7 @@ Statuses: `Discovered` → `Scoped` → `Building` → `InReview` → `Merged` �
 
 | # | Feature | Status | Plan | Issue | PR | Owner (agent) | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0002 | Project foundation: theme, shadcn/ui, auth | Scoped | [plan](../.plan/0002-project-foundation-theme-shadcn-auth.md) | [#1](https://github.com/elitale/coldsocial/issues/1) | _pending_ | Product Owner | Enabling foundation; build order in plan |
+| 0002 | Project foundation: theme, shadcn/ui, auth | Scoped | [plan](../.plan/0002-project-foundation-theme-shadcn-auth.md) | [#1](https://github.com/elitale/coldsocial/issues/1) | [#2](https://github.com/elitale/coldsocial/pull/2) | Product Owner | Enabling foundation; build order in plan |
 
 ---
 
