@@ -292,6 +292,10 @@ existing publisher/metrics contract — not editing a `switch`. Full detail in
 - Nothing is published on a user's behalf without their explicit approval.
 - Found a vulnerability? **Do not open a public issue.** Report it privately to the maintainers
   via the repository's security advisories.
+- **Data sensitivity & compliance:** the app stores personal data (including GDPR
+  special-category political data) and OAuth secrets — classified **confidential**. See
+  [`.github/repository-metadata.yml`](.github/repository-metadata.yml) for the full repository
+  metadata, data classification, and applicable frameworks.
 
 ## License
 
