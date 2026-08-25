@@ -1,9 +1,10 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route(auth()->check() ? 'dashboard' : 'login');
+    return redirect()->route(Auth::check() ? 'dashboard' : 'login');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {

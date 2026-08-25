@@ -27,6 +27,16 @@ Statuses: `Discovered` → `Scoped` → `Building` → `InReview` → `Merged` �
 
 ## Decisions
 
+- **2026-08-26 — Dashboard uses shadcn UI primitives (from `dashboard-01`).** Ran
+  `shadcn add dashboard-01`, kept the reusable UI primitives (card, chart, table, badge, tabs,
+  etc.) and built a dashboard of metric cards + a recharts area chart + an activity table
+  inside our existing header `AppLayout`. Dropped the block's full sidebar shell
+  (`app-sidebar`/`site-header`/`nav-*`) and the heavy drag-and-drop data-table to stay KISS and
+  keep our header layout; removed the now-unused deps (`@dnd-kit/*`, `@tanstack/react-table`,
+  `@tabler/icons-react`, `vaul`, `sonner`, `next-themes`, `zod`). Kept `recharts` — performance
+  charts are core to coldsocial. Note: shadcn detects `pnpm` from `pnpm-workspace.yaml`; run it
+  with that file moved aside (or it fails, since the project uses npm), and it prompts to
+  overwrite existing components.
 - **2026-08-25 — CI + tests run on Postgres (feature 0002).** Superseding the earlier SQLite
   test setup: CI spins up a `postgres:18-alpine` service and the suite runs against a
   dedicated `testing` database (never dev `laravel`), matching the Sail/prod engine. The test

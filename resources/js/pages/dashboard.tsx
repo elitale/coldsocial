@@ -1,5 +1,8 @@
 import { Head } from '@inertiajs/react';
 
+import { ChartArea } from '@/components/dashboard/chart-area';
+import { RecentActivity } from '@/components/dashboard/recent-activity';
+import { SectionCards } from '@/components/dashboard/section-cards';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
@@ -12,25 +15,10 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
 
-            <div className="flex flex-col gap-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    {[0, 1, 2].map((i) => (
-                        <div
-                            key={i}
-                            className="aspect-video rounded-xl border border-border bg-card"
-                        />
-                    ))}
-                </div>
-                <div className="min-h-64 rounded-xl border border-border bg-card p-6">
-                    <h1 className="text-lg font-semibold">
-                        Welcome to coldsocial
-                    </h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        Your social presence, automated. Content generation,
-                        scheduling, and performance insights arrive in upcoming
-                        features.
-                    </p>
-                </div>
+            <div className="flex flex-col gap-4 md:gap-6">
+                <SectionCards />
+                <ChartArea />
+                <RecentActivity />
             </div>
         </AppLayout>
     );
