@@ -27,6 +27,13 @@ Statuses: `Discovered` → `Scoped` → `Building` → `InReview` → `Merged` �
 
 ## Decisions
 
+- **2026-08-25 — CI + tests run on Postgres (feature 0002).** Superseding the earlier SQLite
+  test setup: CI spins up a `postgres:18-alpine` service and the suite runs against a
+  dedicated `testing` database (never dev `laravel`), matching the Sail/prod engine. The test
+  DB is pinned via `<env>`/`<server>` entries in `phpunit.xml` (pgsql @ `127.0.0.1:5432`, db
+  `testing`, `sail`/`password`) so the exported `APP_ENV=local` / `DB_CONNECTION=sqlite` shell
+  vars can't redirect it. Local runs use the Sail-provisioned `testing` DB
+  (`create-testing-database.sql`), so `php artisan test` requires the Sail Postgres to be up.
 - **2026-08-25 — Foundation build choices (feature 0002).** (1) Header-based app shell
   instead of porting the full ~700-line shadcn sidebar — KISS; sidebar can be a later
   enhancement. (2) Settings password routes named `user-password.*` to avoid colliding with
