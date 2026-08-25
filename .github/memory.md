@@ -21,12 +21,16 @@ Statuses: `Discovered` → `Scoped` → `Building` → `InReview` → `Merged` �
 
 | # | Feature | Status | Plan | Issue | PR | Owner (agent) | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| — | _No features yet. The ICP agent surfaces the first need._ | — | — | — | — | — | Bootstrap complete |
+| 0002 | Project foundation: theme, shadcn/ui, auth | Scoped | [plan](../.plan/0002-project-foundation-theme-shadcn-auth.md) | [#1](https://github.com/elitale/coldsocial/issues/1) | _pending_ | Product Owner | Enabling foundation; build order in plan |
 
 ---
 
 ## Decisions
 
+- **2026-08-25 — Auth stack = Laravel Fortify (headless).** For feature 0002 we back
+  authentication with Fortify rather than hand-rolling or using a full UI kit: it's the
+  official headless backend the Laravel React starter kit uses, pairs cleanly with Inertia
+  pages, and leaves us owning the React UI. Two-factor and social sign-in are deferred (YAGNI).
 - **2026-08-25 — Agent loop + standards bootstrapped.** Established the ICP → Product Owner →
   Product Developer loop, the `.plan/` convention (one feature = one plan = one branch = one
   PR = one issue), and the SOLID + YAGNI + KISS principle set (tie-break KISS → YAGNI →
