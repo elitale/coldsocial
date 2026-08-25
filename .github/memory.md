@@ -22,7 +22,7 @@ Statuses: `Discovered` → `Scoped` → `Building` → `InReview` → `Merged` �
 | # | Feature | Status | Plan | Issue | PR | Owner (agent) | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0002 | Project foundation: theme, shadcn/ui, auth | Merged | [plan](../.plan/0002-project-foundation-theme-shadcn-auth.md) | [#1](https://github.com/elitale/coldsocial/issues/1) | [#2](https://github.com/elitale/coldsocial/pull/2) | Product Developer | Merged to main; dashboard + sidebar included; CI green on Postgres |
-| 0003 | User persona intake (onboarding wizard) | Scoped | [plan](../.plan/0003-user-persona-intake.md) | [#3](https://github.com/elitale/coldsocial/issues/3) | _pending_ | Product Owner | Deep persona capture; stepped shadcn wizard; capture-only (generation is a later feature) |
+| 0003 | User persona intake (onboarding wizard) | Scoped | [plan](../.plan/0003-user-persona-intake.md) | [#3](https://github.com/elitale/coldsocial/issues/3) | [#4](https://github.com/elitale/coldsocial/pull/4) | Product Owner | Deep persona capture; stepped shadcn wizard; capture-only (generation is a later feature) |
 
 ---
 

@@ -3,7 +3,7 @@
 - **Status:** Scoped
 - **Branch:** `feature/0003-user-persona-intake`
 - **Issue:** [#3](https://github.com/elitale/coldsocial/issues/3)
-- **PR:** #<pending>
+- **PR:** [#4](https://github.com/elitale/coldsocial/pull/4)
 - **ICP persona:** All three (Priya, Marcus, Sofia). Every ICP must hand coldsocial a rich
   picture of who they are before we can generate content that sounds like them.
 
