@@ -1,6 +1,6 @@
 # 0002 — Project foundation: design system, shadcn/ui, and authentication
 
-- **Status:** Scoped
+- **Status:** InReview — implemented; `composer ci:check` green (30 Pest tests)
 - **Branch:** `feature/0002-project-foundation`
 - **Issue:** [#1](https://github.com/elitale/coldsocial/issues/1)
 - **PR:** [#2](https://github.com/elitale/coldsocial/pull/2)
