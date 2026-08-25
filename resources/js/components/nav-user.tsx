@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronsUpDown, LogOut, Settings } from 'lucide-react';
+import { ChevronsUpDown, LogOut, Settings, UserRound } from 'lucide-react';
 
 import {
     DropdownMenu,
@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/sidebar';
 import UserInfo from '@/components/user-info';
 import { logout } from '@/routes';
+import { edit as editPersona } from '@/routes/onboarding';
 import { edit as editProfile } from '@/routes/profile';
 import type { SharedData } from '@/types';
 
@@ -51,6 +52,12 @@ export function NavUser() {
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
+                            <DropdownMenuItem asChild>
+                                <Link href={editPersona()} className="w-full">
+                                    <UserRound className="mr-2" />
+                                    Persona
+                                </Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                                 <Link href={editProfile()} className="w-full">
                                     <Settings className="mr-2" />

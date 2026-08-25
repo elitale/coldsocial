@@ -21,7 +21,8 @@ Statuses: `Discovered` → `Scoped` → `Building` → `InReview` → `Merged` �
 
 | # | Feature | Status | Plan | Issue | PR | Owner (agent) | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0002 | Project foundation: theme, shadcn/ui, auth | InReview | [plan](../.plan/0002-project-foundation-theme-shadcn-auth.md) | [#1](https://github.com/elitale/coldsocial/issues/1) | [#2](https://github.com/elitale/coldsocial/pull/2) | Product Developer | Implemented; `composer ci:check` green (30 tests, 62 assertions); PR ready for review |
+| 0002 | Project foundation: theme, shadcn/ui, auth | Merged | [plan](../.plan/0002-project-foundation-theme-shadcn-auth.md) | [#1](https://github.com/elitale/coldsocial/issues/1) | [#2](https://github.com/elitale/coldsocial/pull/2) | Product Developer | Merged to main; dashboard + sidebar included; CI green on Postgres |
+| 0003 | User persona intake (onboarding wizard) | InReview | [plan](../.plan/0003-user-persona-intake.md) | [#3](https://github.com/elitale/coldsocial/issues/3) | [#4](https://github.com/elitale/coldsocial/pull/4) | Product Developer | Implemented: Persona model + 6-step shadcn wizard + sidebar/user-menu links; CI green (41 tests) |
 
 ---
 
