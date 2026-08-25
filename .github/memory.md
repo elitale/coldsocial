@@ -27,6 +27,14 @@ Statuses: `Discovered` → `Scoped` → `Building` → `InReview` → `Merged` �
 
 ## Decisions
 
+- **2026-08-26 — Switched to a sidebar app shell (supersedes the earlier header-shell choice).**
+  Per user request the authenticated app now uses the shadcn `sidebar` (collapsible icon rail):
+  `AppSidebar` (brand + nav + user footer via `NavUser`) inside `SidebarProvider`, with a
+  `SidebarInset` top bar (trigger + breadcrumbs). `AppLayout` drives it; `app-header.tsx` was
+  removed. `defaultOpen` comes from the shared `sidebarOpen` prop (backed by the `sidebar_state`
+  cookie). Had to fix shadcn's `use-mobile` hook to not call `setState` in an effect (our
+  `react-hooks/set-state-in-effect` lint rule). Re-add shadcn components with `--overwrite` to
+  avoid the interactive-prompt hang.
 - **2026-08-26 — Dashboard uses shadcn UI primitives (from `dashboard-01`).** Ran
   `shadcn add dashboard-01`, kept the reusable UI primitives (card, chart, table, badge, tabs,
   etc.) and built a dashboard of metric cards + a recharts area chart + an activity table
