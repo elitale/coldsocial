@@ -31,6 +31,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const stepMeta = [
     {
+        title: 'Your social links',
+        description:
+            'Start with the profiles you already have — the rest comes after.',
+    },
+    {
         title: 'What do you want to achieve?',
         description: 'This sets the angle for everything we write for you.',
     },
@@ -44,8 +49,8 @@ const stepMeta = [
         description: 'Topics you love — and anything to steer clear of.',
     },
     {
-        title: 'Your socials',
-        description: 'Where you post, and the accounts we can reference.',
+        title: 'Where & how you post',
+        description: 'Your platforms, formats, and cadence.',
     },
     {
         title: 'Review & finish',
@@ -127,6 +132,73 @@ export default function Onboarding({
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {step === 0 && (
+                            <>
+                                <Field
+                                    label="Your profile links"
+                                    hint="Paste the URLs you have — leave the rest blank."
+                                >
+                                    <div className="grid gap-3 sm:grid-cols-2">
+                                        {Object.entries(
+                                            options.social_platforms,
+                                        ).map(([key, label]) => (
+                                            <div
+                                                key={key}
+                                                className="space-y-1.5"
+                                            >
+                                                <Label
+                                                    htmlFor={`social-${key}`}
+                                                    className="text-xs text-muted-foreground"
+                                                >
+                                                    {label}
+                                                </Label>
+                                                <Input
+                                                    id={`social-${key}`}
+                                                    type="url"
+                                                    inputMode="url"
+                                                    value={
+                                                        data.social_links[
+                                                            key
+                                                        ] ?? ''
+                                                    }
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            'social_links',
+                                                            {
+                                                                ...data.social_links,
+                                                                [key]: e.target
+                                                                    .value,
+                                                            },
+                                                        )
+                                                    }
+                                                    placeholder="https://…"
+                                                />
+                                                <InputError
+                                                    message={
+                                                        socialErrors[
+                                                            `social_links.${key}`
+                                                        ]
+                                                    }
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Field>
+                                <Field
+                                    label="Other links"
+                                    hint="Add any platform we didn't list — a newsletter, portfolio, Linktree, anything."
+                                >
+                                    <CustomLinks
+                                        links={data.custom_links}
+                                        onChange={(v) =>
+                                            setData('custom_links', v)
+                                        }
+                                        errors={socialErrors}
+                                    />
+                                </Field>
+                            </>
+                        )}
+
+                        {step === 1 && (
                             <OptionCards
                                 name="primary_goal"
                                 options={options.primary_goal}
@@ -135,7 +207,7 @@ export default function Onboarding({
                             />
                         )}
 
-                        {step === 1 && (
+                        {step === 2 && (
                             <>
                                 <Field
                                     label="Your headline / role"
@@ -236,7 +308,7 @@ export default function Onboarding({
                             </>
                         )}
 
-                        {step === 2 && (
+                        {step === 3 && (
                             <>
                                 <Field label="Tone" hint="Pick as many as fit.">
                                     <ChipGroup
@@ -283,7 +355,7 @@ export default function Onboarding({
                             </>
                         )}
 
-                        {step === 3 && (
+                        {step === 4 && (
                             <>
                                 <Field label="Interests & topics">
                                     <ChipGroup
@@ -376,70 +448,8 @@ export default function Onboarding({
                             </>
                         )}
 
-                        {step === 4 && (
+                        {step === 5 && (
                             <>
-                                <Field
-                                    label="Your profile links"
-                                    hint="Paste the URLs you have — leave the rest blank."
-                                >
-                                    <div className="grid gap-3 sm:grid-cols-2">
-                                        {Object.entries(
-                                            options.social_platforms,
-                                        ).map(([key, label]) => (
-                                            <div
-                                                key={key}
-                                                className="space-y-1.5"
-                                            >
-                                                <Label
-                                                    htmlFor={`social-${key}`}
-                                                    className="text-xs text-muted-foreground"
-                                                >
-                                                    {label}
-                                                </Label>
-                                                <Input
-                                                    id={`social-${key}`}
-                                                    type="url"
-                                                    inputMode="url"
-                                                    value={
-                                                        data.social_links[
-                                                            key
-                                                        ] ?? ''
-                                                    }
-                                                    onChange={(e) =>
-                                                        setData(
-                                                            'social_links',
-                                                            {
-                                                                ...data.social_links,
-                                                                [key]: e.target
-                                                                    .value,
-                                                            },
-                                                        )
-                                                    }
-                                                    placeholder="https://…"
-                                                />
-                                                <InputError
-                                                    message={
-                                                        socialErrors[
-                                                            `social_links.${key}`
-                                                        ]
-                                                    }
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </Field>
-                                <Field
-                                    label="Other links"
-                                    hint="Add any platform we didn't list — a newsletter, portfolio, Linktree, anything."
-                                >
-                                    <CustomLinks
-                                        links={data.custom_links}
-                                        onChange={(v) =>
-                                            setData('custom_links', v)
-                                        }
-                                        errors={socialErrors}
-                                    />
-                                </Field>
                                 <Field label="Primary platform">
                                     <OptionCards
                                         name="primary_platform"
@@ -483,7 +493,7 @@ export default function Onboarding({
                             </>
                         )}
 
-                        {step === 5 && (
+                        {step === 6 && (
                             <>
                                 <PersonaSummary data={data} options={options} />
                                 <Field
