@@ -1,5 +1,10 @@
 export type PersonaOptions = Record<string, Record<string, string>>;
 
+export interface CustomLink {
+    label: string;
+    url: string;
+}
+
 export interface Persona {
     primary_goal: string | null;
     headline: string | null;
@@ -28,5 +33,6 @@ export interface Persona {
     content_formats: string[] | null;
     focus_platforms: string[] | null;
     social_links: Record<string, string> | null;
+    custom_links: CustomLink[] | null;
     completed_at: string | null;
 }

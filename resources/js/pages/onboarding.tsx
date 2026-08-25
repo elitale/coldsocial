@@ -3,8 +3,10 @@ import { useState } from 'react';
 
 import InputError from '@/components/input-error';
 import { ChipGroup } from '@/components/onboarding/chip-group';
+import { CustomLinks } from '@/components/onboarding/custom-links';
 import { Field } from '@/components/onboarding/field';
 import { OptionCards } from '@/components/onboarding/option-cards';
+import { PersonaSummary } from '@/components/onboarding/persona-summary';
 import { WhyNote } from '@/components/onboarding/why-note';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,7 +49,7 @@ const stepMeta = [
     },
     {
         title: 'Review & finish',
-        description: "Anything else worth knowing, then you're set.",
+        description: "Here's the you we'll write for — add anything we missed.",
     },
 ];
 
@@ -88,6 +90,7 @@ export default function Onboarding({
         content_formats: persona?.content_formats ?? [],
         focus_platforms: persona?.focus_platforms ?? [],
         social_links: (persona?.social_links ?? {}) as Record<string, string>,
+        custom_links: persona?.custom_links ?? [],
     });
 
     const { data, setData, processing, errors } = form;
@@ -425,6 +428,18 @@ export default function Onboarding({
                                         ))}
                                     </div>
                                 </Field>
+                                <Field
+                                    label="Other links"
+                                    hint="Add any platform we didn't list — a newsletter, portfolio, Linktree, anything."
+                                >
+                                    <CustomLinks
+                                        links={data.custom_links}
+                                        onChange={(v) =>
+                                            setData('custom_links', v)
+                                        }
+                                        errors={socialErrors}
+                                    />
+                                </Field>
                                 <Field label="Primary platform">
                                     <OptionCards
                                         name="primary_platform"
@@ -469,20 +484,23 @@ export default function Onboarding({
                         )}
 
                         {step === 5 && (
-                            <Field
-                                label="Anything else about you?"
-                                htmlFor="bio"
-                            >
-                                <Textarea
-                                    id="bio"
-                                    value={data.bio}
-                                    onChange={(e) =>
-                                        setData('bio', e.target.value)
-                                    }
-                                    placeholder="A sentence or two we should know…"
-                                    rows={4}
-                                />
-                            </Field>
+                            <>
+                                <PersonaSummary data={data} options={options} />
+                                <Field
+                                    label="Anything else about you?"
+                                    htmlFor="bio"
+                                >
+                                    <Textarea
+                                        id="bio"
+                                        value={data.bio}
+                                        onChange={(e) =>
+                                            setData('bio', e.target.value)
+                                        }
+                                        placeholder="A sentence or two we should know…"
+                                        rows={4}
+                                    />
+                                </Field>
+                            </>
                         )}
                     </CardContent>
                 </Card>

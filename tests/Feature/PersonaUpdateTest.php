@@ -73,3 +73,56 @@ test('invalid multi-select values are rejected', function () {
         ->patch(route('onboarding.update'), ['interests' => ['ai', 'not-an-interest']])
         ->assertSessionHasErrors('interests.1');
 });
+
+test('a user can save custom links', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->patch(route('onboarding.update'), [
+        'custom_links' => [
+            ['label' => 'Newsletter', 'url' => 'https://news.example.com'],
+            ['label' => 'Portfolio', 'url' => 'https://folio.example.com'],
+        ],
+    ])->assertSessionHasNoErrors();
+
+    expect($user->fresh()->persona->custom_links)->toBe([
+        ['label' => 'Newsletter', 'url' => 'https://news.example.com'],
+        ['label' => 'Portfolio', 'url' => 'https://folio.example.com'],
+    ]);
+});
+
+test('blank custom link rows are discarded', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->patch(route('onboarding.update'), [
+        'custom_links' => [
+            ['label' => '', 'url' => ''],
+            ['label' => 'Podcast', 'url' => 'https://pod.example.com'],
+        ],
+    ])->assertSessionHasNoErrors();
+
+    expect($user->fresh()->persona->custom_links)->toBe([
+        ['label' => 'Podcast', 'url' => 'https://pod.example.com'],
+    ]);
+});
+
+test('a custom link requires a label', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->from(route('onboarding.edit'))
+        ->patch(route('onboarding.update'), [
+            'custom_links' => [['label' => '', 'url' => 'https://example.com']],
+        ])
+        ->assertSessionHasErrors('custom_links.0.label');
+});
+
+test('a custom link rejects an invalid url', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->from(route('onboarding.edit'))
+        ->patch(route('onboarding.update'), [
+            'custom_links' => [['label' => 'Site', 'url' => 'not-a-url']],
+        ])
+        ->assertSessionHasErrors('custom_links.0.url');
+});

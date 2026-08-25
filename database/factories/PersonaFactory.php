@@ -47,6 +47,9 @@ class PersonaFactory extends Factory
             'content_formats' => ['short_text', 'long_form'],
             'focus_platforms' => ['linkedin', 'x'],
             'social_links' => ['linkedin' => 'https://www.linkedin.com/in/'.fake()->userName()],
+            'custom_links' => [
+                ['label' => 'Newsletter', 'url' => 'https://'.fake()->domainName()],
+            ],
             'completed_at' => now(),
         ];
     }

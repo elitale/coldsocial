@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'personality_archetype', 'emoji_usage', 'formality', 'political_stance', 'political_leaning',
     'controversy_comfort', 'primary_platform', 'posting_frequency', 'audience_note', 'dislikes',
     'bio', 'languages', 'audiences', 'tones', 'interests', 'content_pillars', 'likes', 'causes',
-    'content_formats', 'focus_platforms', 'social_links', 'completed_at',
+    'content_formats', 'focus_platforms', 'social_links', 'custom_links', 'completed_at',
 ])]
 class Persona extends Model
 {
@@ -146,6 +146,7 @@ class Persona extends Model
             'content_formats' => 'array',
             'focus_platforms' => 'array',
             'social_links' => 'array',
+            'custom_links' => 'array',
             'completed_at' => 'datetime',
         ];
     }

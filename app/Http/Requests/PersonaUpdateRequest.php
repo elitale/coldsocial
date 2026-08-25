@@ -22,7 +22,25 @@ class PersonaUpdateRequest extends FormRequest
                 Arr::only((array) $this->input('social_links', []), $allowed),
                 fn ($value): bool => filled($value),
             ),
+            'custom_links' => $this->normalizeCustomLinks(),
         ]);
+    }
+
+    /**
+     * Trim custom link rows and drop any where both label and url are blank.
+     *
+     * @return array<int, array{label: string, url: string}>
+     */
+    protected function normalizeCustomLinks(): array
+    {
+        return collect((array) $this->input('custom_links', []))
+            ->map(fn ($row): array => [
+                'label' => is_array($row) ? trim((string) ($row['label'] ?? '')) : '',
+                'url' => is_array($row) ? trim((string) ($row['url'] ?? '')) : '',
+            ])
+            ->reject(fn (array $row): bool => $row['label'] === '' && $row['url'] === '')
+            ->values()
+            ->all();
     }
 
     /**
@@ -73,6 +91,10 @@ class PersonaUpdateRequest extends FormRequest
 
             'social_links' => ['nullable', 'array'],
             'social_links.*' => ['nullable', 'url', 'max:255'],
+
+            'custom_links' => ['nullable', 'array', 'max:10'],
+            'custom_links.*.label' => ['required', 'string', 'max:50'],
+            'custom_links.*.url' => ['required', 'url', 'max:255'],
         ];
     }
 }
