@@ -1,4 +1,5 @@
 import { createInertiaApp } from '@inertiajs/react';
+import { initializeTheme } from './hooks/use-appearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -8,3 +9,6 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
+
+// Set the theme on initial page load, before the app renders.
+initializeTheme();
