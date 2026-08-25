@@ -1,0 +1,83 @@
+# Repository metadata for coldsocial
+#
+# Mirrors the fields GitHub surfaces as repository "custom properties"
+# (Settings → Custom properties: compliance frameworks, data sensitivity, project details).
+# This file is the version-controlled source of truth; apply the same values in GitHub via
+# Settings, the REST API, or `gh`. Keep it in sync when the facts change.
+#
+# NOTE: nothing here is a certification claim. "applicable" / "aspirational" means a framework
+# we design toward, not one we have been audited against.
+
+schema_version: 1
+
+project:
+  name: coldsocial
+  description: >-
+    Automates a person's or brand's social media presence — captures who they are, generates
+    platform-native posts, publishes/schedules them, and reports on performance.
+  status: active-development
+  visibility: public
+  homepage: https://github.com/elitale/coldsocial
+  primary_language: PHP
+  stack: [Laravel, Inertia.js, React, TypeScript, Tailwind CSS, PostgreSQL]
+  license: MIT
+  # GitHub "About" topics — apply with:  gh repo edit --add-topic <topic>
+  topics:
+    - social-media-automation
+    - content-generation
+    - laravel
+    - inertiajs
+    - react
+    - typescript
+    - saas
+
+ownership:
+  maintainers:
+    - "@elitale"
+  security_contact: soni+coldsocial_github@elitale.com   # set before enabling public vulnerability reporting
+
+data:
+  # Highest sensitivity of data this system stores or processes.
+  classification: confidential
+  contains_pii: true
+  personal_data:
+    - names, headlines, company, location, free-text bio
+    - audience and interest selections
+    - social profile URLs and connected-account identifiers
+    - OAuth access/refresh tokens for third-party platforms
+  # GDPR Art. 9 "special category" data captured by the persona intake flow:
+  special_category_data:
+    - political opinions (persona political stance / leaning)
+  secrets_stored:
+    - third-party OAuth tokens (encrypt at rest; never log)
+  data_residency: undefined            # set once hosting region(s) are chosen
+  retention_policy: undefined          # define before general availability
+
+compliance:
+  # Frameworks this project is DESIGNED toward. None are certified yet.
+  certified: []
+  applicable:
+    - name: OWASP Top 10
+      status: followed
+      note: Secure-coding baseline enforced in review (see AGENTS.md and copilot-instructions.md).
+    - name: GDPR
+      status: applicable
+      note: Processes EU-resident PII, including special-category (political) data.
+    - name: CCPA/CPRA
+      status: applicable
+      note: Applies when serving California residents.
+    - name: SOC 2 (Security, Availability, Confidentiality)
+      status: aspirational
+      note: Target for the hosted SaaS offering; not yet audited.
+  # Publishing/metrics integrations must honor each platform's developer terms.
+  platform_terms:
+    - LinkedIn Developer / Marketing API Terms
+    - Meta Platform Terms (Instagram, Facebook)
+    - TikTok Developer Terms of Service
+    - YouTube API Services & Google API Services Terms
+    - X (Twitter) Developer Agreement & Policy
+  not_applicable:
+    - name: PCI DSS
+      note: No cardholder data stored; billing (if added) is delegated to a PCI-compliant provider.
+    - name: HIPAA
+      note: No protected health information is processed.
