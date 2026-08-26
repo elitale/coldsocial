@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Ai\ProviderRequestException;
 use App\Content\GenerateLinkedInDraft;
 use App\Content\RewriteDraft;
+use App\Enums\PostStatus;
 use App\Http\Requests\GeneratePostRequest;
 use App\Http\Requests\PostUpdateRequest;
 use App\Http\Requests\RegeneratePostRequest;
@@ -90,6 +91,32 @@ class PostController extends Controller
         } catch (ProviderRequestException $e) {
             return back()->withErrors(['regenerate' => $e->getMessage()]);
         }
+
+        return to_route('posts.show', $post);
+    }
+
+    /**
+     * Approve a draft — the gate before scheduling / publishing.
+     */
+    public function approve(Request $request, Post $post): RedirectResponse
+    {
+        abort_unless($post->user_id === $request->user()->id, 403);
+
+        $post->status = PostStatus::Approved;
+        $post->save();
+
+        return to_route('posts.show', $post);
+    }
+
+    /**
+     * Send an approved post back to draft.
+     */
+    public function unapprove(Request $request, Post $post): RedirectResponse
+    {
+        abort_unless($post->user_id === $request->user()->id, 403);
+
+        $post->status = PostStatus::Draft;
+        $post->save();
 
         return to_route('posts.show', $post);
     }

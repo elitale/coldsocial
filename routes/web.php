@@ -26,6 +26,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
     Route::patch('posts/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::post('posts/{post}/regenerate', [PostController::class, 'regenerate'])->name('posts.regenerate');
+    Route::post('posts/{post}/approve', [PostController::class, 'approve'])->name('posts.approve');
+    Route::post('posts/{post}/unapprove', [PostController::class, 'unapprove'])->name('posts.unapprove');
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 });
 

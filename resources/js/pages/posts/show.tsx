@@ -7,7 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import { edit as editPost, regenerate } from '@/routes/posts';
+import {
+    approve,
+    edit as editPost,
+    regenerate,
+    unapprove,
+} from '@/routes/posts';
 import { index as updatesIndex } from '@/routes/updates';
 import type { BreadcrumbItem } from '@/types';
 import type { Post } from '@/types/post';
@@ -26,9 +31,16 @@ export default function ShowPost({ post }: { post: Post }) {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Your LinkedIn draft</CardTitle>
-                        <Badge variant="secondary" className="uppercase">
-                            {post.platform}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                            {post.status === 'approved' ? (
+                                <Badge>Approved</Badge>
+                            ) : (
+                                <Badge variant="outline">Draft</Badge>
+                            )}
+                            <Badge variant="secondary" className="uppercase">
+                                {post.platform}
+                            </Badge>
+                        </div>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-4">
                         <p className="text-sm whitespace-pre-wrap">
@@ -54,13 +66,47 @@ export default function ShowPost({ post }: { post: Post }) {
                             </p>
                         )}
 
-                        <div className="flex gap-2">
-                            <Button asChild size="sm">
+                        <div className="flex flex-wrap gap-2">
+                            {post.status === 'approved' ? (
+                                <Form
+                                    action={unapprove.url({ post: post.id })}
+                                    method="post"
+                                    options={{ preserveScroll: true }}
+                                >
+                                    {({ processing }) => (
+                                        <Button
+                                            type="submit"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={processing}
+                                        >
+                                            Unapprove
+                                        </Button>
+                                    )}
+                                </Form>
+                            ) : (
+                                <Form
+                                    action={approve.url({ post: post.id })}
+                                    method="post"
+                                    options={{ preserveScroll: true }}
+                                >
+                                    {({ processing }) => (
+                                        <Button
+                                            type="submit"
+                                            size="sm"
+                                            disabled={processing}
+                                        >
+                                            Approve
+                                        </Button>
+                                    )}
+                                </Form>
+                            )}
+                            <Button asChild variant="outline" size="sm">
                                 <Link href={editPost({ post: post.id }).url}>
                                     Edit
                                 </Link>
                             </Button>
-                            <Button asChild variant="outline" size="sm">
+                            <Button asChild variant="ghost" size="sm">
                                 <Link href={updatesIndex().url}>
                                     Back to updates
                                 </Link>

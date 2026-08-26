@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PostStatus;
 use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,7 @@ use Illuminate\Support\Carbon;
  * @property int $user_id
  * @property int|null $update_id
  * @property string $platform
+ * @property PostStatus $status
  * @property string $body
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -25,6 +27,16 @@ class Post extends Model
 {
     /** @use HasFactory<PostFactory> */
     use HasFactory;
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => PostStatus::class,
+        ];
+    }
 
     /**
      * @return BelongsTo<User, $this>
