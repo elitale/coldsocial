@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Ai\ProviderRequestException;
 use App\Content\GenerateLinkedInDraft;
 use App\Http\Requests\GeneratePostRequest;
+use App\Http\Requests\PostUpdateRequest;
 use App\Models\Post;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,6 +50,30 @@ class PostController extends Controller
         return Inertia::render('posts/show', [
             'post' => $post->load('sourceUpdate'),
         ]);
+    }
+
+    /**
+     * Show the edit form for a draft.
+     */
+    public function edit(Request $request, Post $post): Response
+    {
+        abort_unless($post->user_id === $request->user()->id, 403);
+
+        return Inertia::render('posts/edit', [
+            'post' => $post,
+        ]);
+    }
+
+    /**
+     * Save edits to a draft's body.
+     */
+    public function update(PostUpdateRequest $request, Post $post): RedirectResponse
+    {
+        abort_unless($post->user_id === $request->user()->id, 403);
+
+        $post->update($request->validated());
+
+        return to_route('posts.show', $post);
     }
 
     /**
