@@ -23,7 +23,28 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Posting settings', href: edit().url },
 ];
 
-const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const rawBrowserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+/** Prefer the modern canonical IANA name (e.g. Asia/Kolkata) over legacy aliases (Asia/Calcutta). */
+function canonicalTimezone(tz: string, known: string[]): string {
+    if (known.includes(tz)) {
+        return tz;
+    }
+
+    try {
+        const resolved = new Intl.DateTimeFormat('en-US', {
+            timeZone: tz,
+        }).resolvedOptions().timeZone;
+
+        if (known.includes(resolved)) {
+            return resolved;
+        }
+    } catch {
+        // Unknown zone — fall through to the raw value.
+    }
+
+    return tz;
+}
 
 export default function Posting({
     timezone,
@@ -32,6 +53,7 @@ export default function Posting({
     timezone: string | null;
     timezones: string[];
 }) {
+    const browserTimezone = canonicalTimezone(rawBrowserTimezone, timezones);
     const [value, setValue] = useState(timezone ?? browserTimezone);
     const autoSaved = useRef(false);
 
@@ -47,13 +69,16 @@ export default function Posting({
             { timezone: browserTimezone },
             { preserveScroll: true },
         );
-    }, [timezone]);
+    }, [timezone, browserTimezone]);
 
-    // Keep the current value selectable even if it's an alias not in PHP's canonical list.
-    const options = useMemo(
-        () => (timezones.includes(value) ? timezones : [value, ...timezones]),
-        [timezones, value],
-    );
+    // Always keep the detected zone + current value selectable, even if they aren't in PHP's list.
+    const options = useMemo(() => {
+        const extras = [browserTimezone, value].filter(
+            (tz) => !timezones.includes(tz),
+        );
+
+        return Array.from(new Set([...extras, ...timezones]));
+    }, [browserTimezone, timezones, value]);
 
     // Group zones by IANA region (the part before the first "/") for a sectioned picker.
     const groups = useMemo(() => {
@@ -102,7 +127,7 @@ export default function Posting({
                                             >
                                                 <SelectValue placeholder="Select a timezone" />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent position="popper">
                                                 {groups.map(
                                                     ([region, zones]) => (
                                                         <SelectGroup
