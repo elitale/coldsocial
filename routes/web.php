@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\PersonaController;
 use App\Http\Middleware\EnsurePersonaIsComplete;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\UpdateController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +16,21 @@ Route::middleware(['auth', 'verified', EnsurePersonaIsComplete::class])->group(f
 
     Route::get('onboarding', [PersonaController::class, 'edit'])->name('onboarding.edit');
     Route::patch('onboarding', [PersonaController::class, 'update'])->name('onboarding.update');
+
+    Route::get('updates', [UpdateController::class, 'index'])->name('updates.index');
+    Route::post('updates', [UpdateController::class, 'store'])->name('updates.store');
+    Route::delete('updates/{update}', [UpdateController::class, 'destroy'])->name('updates.destroy');
+
+    Route::get('posts', [PostController::class, 'index'])->name('posts.index');
+    Route::post('posts', [PostController::class, 'store'])->name('posts.store');
+    Route::post('posts/week', [PostController::class, 'week'])->name('posts.week');
+    Route::get('posts/{post}', [PostController::class, 'show'])->name('posts.show');
+    Route::get('posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+    Route::patch('posts/{post}', [PostController::class, 'update'])->name('posts.update');
+    Route::post('posts/{post}/regenerate', [PostController::class, 'regenerate'])->name('posts.regenerate');
+    Route::post('posts/{post}/approve', [PostController::class, 'approve'])->name('posts.approve');
+    Route::post('posts/{post}/unapprove', [PostController::class, 'unapprove'])->name('posts.unapprove');
+    Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 });
 
 require __DIR__.'/settings.php';
