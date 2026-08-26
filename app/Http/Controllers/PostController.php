@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Ai\ProviderRequestException;
 use App\Content\GenerateLinkedInDraft;
+use App\Content\GenerateWeeklyDrafts;
 use App\Content\RewriteDraft;
 use App\Enums\PostStatus;
 use App\Http\Requests\GeneratePostRequest;
@@ -41,6 +42,20 @@ class PostController extends Controller
         }
 
         return to_route('posts.show', $post);
+    }
+
+    /**
+     * Generate a week of drafts (persona + recent updates, varied angles).
+     */
+    public function week(Request $request, GenerateWeeklyDrafts $action): RedirectResponse
+    {
+        try {
+            $action->forUser($request->user());
+        } catch (ProviderRequestException $e) {
+            return back()->withErrors(['generate' => $e->getMessage()]);
+        }
+
+        return to_route('posts.index');
     }
 
     /**
