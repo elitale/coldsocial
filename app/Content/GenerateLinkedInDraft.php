@@ -4,7 +4,6 @@ namespace App\Content;
 
 use App\Ai\ProviderRequestException;
 use App\Ai\TextGenerator;
-use App\Models\Persona;
 use App\Models\Post;
 use App\Models\Update;
 
@@ -32,7 +31,7 @@ class GenerateLinkedInDraft
     {
         $lines = ['Write a single LinkedIn post based on the update below.'];
 
-        foreach ($this->voiceHints($update->user->persona) as $hint) {
+        foreach (PersonaVoice::hints($update->user->persona) as $hint) {
             $lines[] = $hint;
         }
 
@@ -45,41 +44,5 @@ class GenerateLinkedInDraft
         $lines[] = 'Return only the post text, ready to publish — authentic and engaging for LinkedIn.';
 
         return implode("\n", $lines);
-    }
-
-    /**
-     * Compact voice cues drawn from the persona, skipping anything not set.
-     *
-     * @return list<string>
-     */
-    private function voiceHints(?Persona $persona): array
-    {
-        if ($persona === null) {
-            return [];
-        }
-
-        $hints = [];
-
-        if (is_string($persona->headline) && $persona->headline !== '') {
-            $hints[] = "Author: {$persona->headline}.";
-        }
-
-        if (is_string($persona->formality) && $persona->formality !== '') {
-            $hints[] = "Formality: {$persona->formality}.";
-        }
-
-        if (is_string($persona->emoji_usage) && $persona->emoji_usage !== '') {
-            $hints[] = "Emoji usage: {$persona->emoji_usage}.";
-        }
-
-        foreach (['Tone' => $persona->tones, 'Audience' => $persona->audiences] as $label => $values) {
-            $strings = array_filter((array) $values, 'is_string');
-
-            if ($strings !== []) {
-                $hints[] = "{$label}: ".implode(', ', $strings).'.';
-            }
-        }
-
-        return $hints;
     }
 }

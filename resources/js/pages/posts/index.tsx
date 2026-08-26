@@ -1,10 +1,11 @@
 import { Form, Head, Link } from '@inertiajs/react';
 
+import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { destroy, index, show } from '@/routes/posts';
+import { destroy, index, show, week } from '@/routes/posts';
 import type { BreadcrumbItem } from '@/types';
 import type { Post } from '@/types/post';
 
@@ -24,11 +25,29 @@ export default function PostsIndex({ posts }: { posts: Post[] }) {
             <Head title="Posts" />
 
             <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-4">
-                <div>
-                    <h1 className="text-lg font-semibold">Your drafts</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Generated posts waiting for your review.
-                    </p>
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <h1 className="text-lg font-semibold">Your drafts</h1>
+                        <p className="text-sm text-muted-foreground">
+                            Generated posts waiting for your review.
+                        </p>
+                    </div>
+                    <Form
+                        action={week.url()}
+                        method="post"
+                        options={{ preserveScroll: true }}
+                    >
+                        {({ processing, errors }) => (
+                            <div className="flex flex-col items-end gap-1">
+                                <Button type="submit" disabled={processing}>
+                                    {processing
+                                        ? 'Generating…'
+                                        : 'Generate a week'}
+                                </Button>
+                                <InputError message={errors.generate} />
+                            </div>
+                        )}
+                    </Form>
                 </div>
 
                 {posts.length === 0 ? (
