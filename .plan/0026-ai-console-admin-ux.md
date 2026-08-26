@@ -2,10 +2,10 @@
 
 ## Metadata
 
-- **Status:** Scoped
+- **Status:** InReview
 - **Sequence / slug:** `0026` / `ai-console-admin-ux`
-- **Branch:** `feature/0026-ai-console-admin-ux`
-- **Issue:** _pending_ · **PR:** _pending_
+- **Branch:** `feature/0025-ai-provider-registry` (built on the current registry PR)
+- **Issue:** _n/a_ · **PR:** #45
 - **ICP persona:** n/a (internal **admin** DX — the person configuring AI providers)
 - **Target platform(s):** n/a (Artisan CLI)
 - **Depends on:** 0025 (AI registry + `php artisan ai` console, PR #45)
