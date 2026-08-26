@@ -41,3 +41,14 @@ test('an invalid timezone is rejected', function () {
 
     expect($user->fresh()->timezone)->toBe('UTC');
 });
+
+test('a browser alias timezone (e.g. Asia/Calcutta) is accepted', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    $this->actingAs($user)
+        ->patch(route('posting.update'), ['timezone' => 'Asia/Calcutta'])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('posting.edit'));
+
+    expect($user->fresh()->timezone)->toBe('Asia/Calcutta');
+});
