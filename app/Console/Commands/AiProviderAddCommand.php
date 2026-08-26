@@ -27,7 +27,12 @@ class AiProviderAddCommand extends Command
             return self::FAILURE;
         }
 
-        $key = $this->option('key') ?: password('API key (leave blank for none)');
+        $key = $this->option('key');
+
+        // Only prompt when no --key was supplied at all (an empty --key means "no key").
+        if ($key === null && $this->input->isInteractive()) {
+            $key = password('API key (leave blank for none)');
+        }
 
         $provider = AiProvider::create([
             'name' => $name,

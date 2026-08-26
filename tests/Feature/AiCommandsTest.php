@@ -91,3 +91,27 @@ test('ai:model:default fails for an unknown model', function () {
     $this->artisan('ai:model:default', ['capability' => 'text', 'identifier' => 'nope'])
         ->assertFailed();
 });
+
+test('ai:provider:enable and ai:provider:disable flip the flag', function () {
+    $provider = AiProvider::factory()->create(['slug' => 'openai', 'enabled' => false]);
+
+    $this->artisan('ai:provider:enable', ['slug' => 'openai'])->assertSuccessful();
+    expect($provider->fresh()->enabled)->toBeTrue();
+
+    $this->artisan('ai:provider:disable', ['slug' => 'openai'])->assertSuccessful();
+    expect($provider->fresh()->enabled)->toBeFalse();
+});
+
+test('ai:provider:enable fails for an unknown slug', function () {
+    $this->artisan('ai:provider:enable', ['slug' => 'nope'])->assertFailed();
+});
+
+test('ai:provider:remove --force deletes the provider and its models', function () {
+    $provider = AiProvider::factory()->create(['slug' => 'openai']);
+    AiModel::factory()->for($provider, 'provider')->count(2)->create();
+
+    $this->artisan('ai:provider:remove', ['slug' => 'openai', '--force' => true])->assertSuccessful();
+
+    expect(AiProvider::count())->toBe(0)
+        ->and(AiModel::count())->toBe(0);
+});

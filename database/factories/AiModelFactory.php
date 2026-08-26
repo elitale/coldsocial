@@ -21,7 +21,7 @@ class AiModelFactory extends Factory
     {
         return [
             'ai_provider_id' => AiProvider::factory(),
-            'identifier' => fake()->randomElement(['gpt-4o', 'gpt-4o-mini', 'o3-mini', 'claude-3-7-sonnet']),
+            'identifier' => fake()->randomElement(['gpt-4o', 'gpt-4o-mini', 'o3-mini', 'claude-3-7-sonnet']).'-'.fake()->unique()->numerify('###'),
             'label' => null,
             'capability' => AiCapability::Text,
             'enabled' => true,
