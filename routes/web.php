@@ -20,8 +20,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('updates', [UpdateController::class, 'store'])->name('updates.store');
     Route::delete('updates/{update}', [UpdateController::class, 'destroy'])->name('updates.destroy');
 
+    Route::get('posts', [PostController::class, 'index'])->name('posts.index');
     Route::post('posts', [PostController::class, 'store'])->name('posts.store');
     Route::get('posts/{post}', [PostController::class, 'show'])->name('posts.show');
+    Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 });
 
 require __DIR__.'/settings.php';
