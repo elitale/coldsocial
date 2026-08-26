@@ -1,4 +1,5 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, router } from '@inertiajs/react';
+import { useEffect, useRef } from 'react';
 
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -13,6 +14,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Posting settings', href: edit().url },
 ];
 
+const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 export default function Posting({
     timezone,
     timezones,
@@ -20,6 +23,30 @@ export default function Posting({
     timezone: string | null;
     timezones: string[];
 }) {
+    const autoSaved = useRef(false);
+
+    // First visit only: adopt the browser's timezone so the user doesn't have to pick one.
+    useEffect(() => {
+        if (
+            autoSaved.current ||
+            timezone ||
+            !timezones.includes(browserTimezone)
+        ) {
+            return;
+        }
+
+        autoSaved.current = true;
+        router.patch(
+            update.url(),
+            { timezone: browserTimezone },
+            { preserveScroll: true },
+        );
+    }, [timezone, timezones]);
+
+    const selectedTimezone =
+        timezone ??
+        (timezones.includes(browserTimezone) ? browserTimezone : 'UTC');
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Posting settings" />
@@ -28,7 +55,7 @@ export default function Posting({
                 <div className="space-y-6">
                     <HeadingSmall
                         title="Posting timezone"
-                        description="We'll schedule and show your posts in this timezone."
+                        description="Auto-detected from your browser — we'll schedule and show your posts in this timezone."
                     />
 
                     <Form
@@ -44,7 +71,7 @@ export default function Posting({
                                     <select
                                         id="timezone"
                                         name="timezone"
-                                        defaultValue={timezone ?? 'UTC'}
+                                        defaultValue={selectedTimezone}
                                         className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30"
                                     >
                                         {timezones.map((tz) => (
