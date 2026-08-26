@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
+import { store as generatePost } from '@/routes/posts';
 import { destroy, index, store } from '@/routes/updates';
 import type { BreadcrumbItem } from '@/types';
 import type { Update } from '@/types/update';
@@ -112,24 +113,55 @@ export default function Updates({ updates }: { updates: Update[] }) {
                                             </a>
                                         )}
                                     </div>
-                                    <Form
-                                        action={destroy.url({
-                                            update: update.id,
-                                        })}
-                                        method="delete"
-                                        options={{ preserveScroll: true }}
-                                    >
-                                        {({ processing }) => (
-                                            <Button
-                                                type="submit"
-                                                variant="ghost"
-                                                size="sm"
-                                                disabled={processing}
-                                            >
-                                                Delete
-                                            </Button>
-                                        )}
-                                    </Form>
+                                    <div className="flex shrink-0 flex-col items-end gap-2">
+                                        <Form
+                                            action={generatePost.url()}
+                                            method="post"
+                                            options={{ preserveScroll: true }}
+                                        >
+                                            {({ processing, errors }) => (
+                                                <>
+                                                    <input
+                                                        type="hidden"
+                                                        name="update_id"
+                                                        defaultValue={update.id}
+                                                    />
+                                                    <Button
+                                                        type="submit"
+                                                        size="sm"
+                                                        disabled={processing}
+                                                    >
+                                                        {processing
+                                                            ? 'Generating…'
+                                                            : 'Generate post'}
+                                                    </Button>
+                                                    <InputError
+                                                        message={
+                                                            errors.generate
+                                                        }
+                                                    />
+                                                </>
+                                            )}
+                                        </Form>
+                                        <Form
+                                            action={destroy.url({
+                                                update: update.id,
+                                            })}
+                                            method="delete"
+                                            options={{ preserveScroll: true }}
+                                        >
+                                            {({ processing }) => (
+                                                <Button
+                                                    type="submit"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    disabled={processing}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            )}
+                                        </Form>
+                                    </div>
                                 </CardContent>
                             </Card>
                         ))

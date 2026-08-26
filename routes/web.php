@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PersonaController;
 use App\Http\Middleware\EnsurePersonaIsComplete;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\UpdateController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,9 @@ Route::middleware(['auth', 'verified', EnsurePersonaIsComplete::class])->group(f
     Route::get('updates', [UpdateController::class, 'index'])->name('updates.index');
     Route::post('updates', [UpdateController::class, 'store'])->name('updates.store');
     Route::delete('updates/{update}', [UpdateController::class, 'destroy'])->name('updates.destroy');
+
+    Route::post('posts', [PostController::class, 'store'])->name('posts.store');
+    Route::get('posts/{post}', [PostController::class, 'show'])->name('posts.show');
 });
 
 require __DIR__.'/settings.php';
