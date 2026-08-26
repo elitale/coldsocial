@@ -2,10 +2,10 @@
 
 ## Metadata
 
-- **Status:** Building
+- **Status:** InReview
 - **Sequence / slug:** `0028` / `wire-content-generation`
 - **Branch:** `feature/0028-wire-content-generation`
-- **Issue:** #34 · **PR:** _pending_
+- **Issue:** #34 · **PR:** #46
 - **ICP persona:** n/a (internal enabler; unblocks generation for Priya/Marcus/Sofia)
 - **Target platform(s):** n/a (platform-agnostic text generation)
 - **Depends on:** 0025 (AI provider & model registry, merged in #45)
