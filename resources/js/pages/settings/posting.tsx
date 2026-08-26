@@ -5,6 +5,15 @@ import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit, update } from '@/routes/posting';
@@ -46,6 +55,20 @@ export default function Posting({
         [timezones, value],
     );
 
+    // Group zones by IANA region (the part before the first "/") for a sectioned picker.
+    const groups = useMemo(() => {
+        const byRegion: Record<string, string[]> = {};
+
+        for (const tz of options) {
+            const region = tz.includes('/') ? tz.split('/')[0] : 'Other';
+            (byRegion[region] ??= []).push(tz);
+        }
+
+        return Object.entries(byRegion)
+            .map(([region, zones]) => [region, [...zones].sort()] as const)
+            .sort((a, b) => a[0].localeCompare(b[0]));
+    }, [options]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Posting settings" />
@@ -68,21 +91,39 @@ export default function Posting({
                                 <div className="grid gap-2">
                                     <Label htmlFor="timezone">Timezone</Label>
                                     <div className="flex gap-2">
-                                        <select
-                                            id="timezone"
+                                        <Select
                                             name="timezone"
                                             value={value}
-                                            onChange={(e) =>
-                                                setValue(e.target.value)
-                                            }
-                                            className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30"
+                                            onValueChange={setValue}
                                         >
-                                            {options.map((tz) => (
-                                                <option key={tz} value={tz}>
-                                                    {tz}
-                                                </option>
-                                            ))}
-                                        </select>
+                                            <SelectTrigger
+                                                id="timezone"
+                                                className="w-full"
+                                            >
+                                                <SelectValue placeholder="Select a timezone" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {groups.map(
+                                                    ([region, zones]) => (
+                                                        <SelectGroup
+                                                            key={region}
+                                                        >
+                                                            <SelectLabel>
+                                                                {region}
+                                                            </SelectLabel>
+                                                            {zones.map((tz) => (
+                                                                <SelectItem
+                                                                    key={tz}
+                                                                    value={tz}
+                                                                >
+                                                                    {tz}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectGroup>
+                                                    ),
+                                                )}
+                                            </SelectContent>
+                                        </Select>
                                         <Button
                                             type="button"
                                             variant="outline"
