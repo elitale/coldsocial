@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Settings;
 
-use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -24,13 +23,7 @@ class PostingUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'timezone' => ['required', 'string', function (string $attribute, mixed $value, Closure $fail): void {
-                try {
-                    new \DateTimeZone(is_string($value) ? $value : '');
-                } catch (\Exception) {
-                    $fail('The selected timezone is invalid.');
-                }
-            }],
+            'timezone' => ['required', 'timezone'],
         ];
     }
 }

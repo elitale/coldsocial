@@ -25,10 +25,29 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const rawBrowserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-/** Prefer the modern canonical IANA name (e.g. Asia/Kolkata) over legacy aliases (Asia/Calcutta). */
+/** Legacy IANA aliases some browsers still report, mapped to the modern canonical name. */
+const TIMEZONE_ALIASES: Record<string, string> = {
+    'Asia/Calcutta': 'Asia/Kolkata',
+    'Asia/Katmandu': 'Asia/Kathmandu',
+    'Asia/Rangoon': 'Asia/Yangon',
+    'Asia/Saigon': 'Asia/Ho_Chi_Minh',
+    'Asia/Ulan_Bator': 'Asia/Ulaanbaatar',
+    'America/Buenos_Aires': 'America/Argentina/Buenos_Aires',
+    'Europe/Kiev': 'Europe/Kyiv',
+    'Pacific/Ponape': 'Pacific/Pohnpei',
+    'Pacific/Truk': 'Pacific/Chuuk',
+};
+
+/** Resolve the browser's zone to a canonical IANA name the backend recognises (else UTC). */
 function canonicalTimezone(tz: string, known: string[]): string {
     if (known.includes(tz)) {
         return tz;
+    }
+
+    const aliased = TIMEZONE_ALIASES[tz];
+
+    if (aliased && known.includes(aliased)) {
+        return aliased;
     }
 
     try {
@@ -40,10 +59,10 @@ function canonicalTimezone(tz: string, known: string[]): string {
             return resolved;
         }
     } catch {
-        // Unknown zone — fall through to the raw value.
+        // Unknown zone — fall through.
     }
 
-    return tz;
+    return known.includes('UTC') ? 'UTC' : tz;
 }
 
 export default function Posting({
