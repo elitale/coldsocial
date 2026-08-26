@@ -1,10 +1,13 @@
-import { Head, Link } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 
+import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import { edit as editPost } from '@/routes/posts';
+import { edit as editPost, regenerate } from '@/routes/posts';
 import { index as updatesIndex } from '@/routes/updates';
 import type { BreadcrumbItem } from '@/types';
 import type { Post } from '@/types/post';
@@ -63,6 +66,53 @@ export default function ShowPost({ post }: { post: Post }) {
                                 </Link>
                             </Button>
                         </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Tweak this draft</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Form
+                            action={regenerate.url({ post: post.id })}
+                            method="post"
+                            options={{ preserveScroll: true }}
+                            resetOnSuccess
+                            className="flex flex-col gap-3"
+                        >
+                            {({ processing, errors }) => (
+                                <>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="instruction">
+                                            How should we change it?
+                                        </Label>
+                                        <Input
+                                            id="instruction"
+                                            name="instruction"
+                                            required
+                                            placeholder="Make it shorter and add a call to action"
+                                        />
+                                        <InputError
+                                            message={errors.instruction}
+                                        />
+                                        <InputError
+                                            message={errors.regenerate}
+                                        />
+                                    </div>
+                                    <div>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            {processing
+                                                ? 'Rewriting…'
+                                                : 'Regenerate'}
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+                        </Form>
                     </CardContent>
                 </Card>
             </div>

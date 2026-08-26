@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Ai\ProviderRequestException;
 use App\Content\GenerateLinkedInDraft;
+use App\Content\RewriteDraft;
 use App\Http\Requests\GeneratePostRequest;
 use App\Http\Requests\PostUpdateRequest;
+use App\Http\Requests\RegeneratePostRequest;
 use App\Models\Post;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -72,6 +74,22 @@ class PostController extends Controller
         abort_unless($post->user_id === $request->user()->id, 403);
 
         $post->update($request->validated());
+
+        return to_route('posts.show', $post);
+    }
+
+    /**
+     * Rewrite a draft in place from a free-text instruction.
+     */
+    public function regenerate(RegeneratePostRequest $request, Post $post, RewriteDraft $rewrite): RedirectResponse
+    {
+        abort_unless($post->user_id === $request->user()->id, 403);
+
+        try {
+            $rewrite->apply($post, $request->string('instruction')->toString());
+        } catch (ProviderRequestException $e) {
+            return back()->withErrors(['regenerate' => $e->getMessage()]);
+        }
 
         return to_route('posts.show', $post);
     }

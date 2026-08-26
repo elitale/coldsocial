@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('posts/{post}', [PostController::class, 'show'])->name('posts.show');
     Route::get('posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
     Route::patch('posts/{post}', [PostController::class, 'update'])->name('posts.update');
+    Route::post('posts/{post}/regenerate', [PostController::class, 'regenerate'])->name('posts.regenerate');
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 });
 
