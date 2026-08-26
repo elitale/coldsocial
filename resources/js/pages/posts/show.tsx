@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
+import { edit as editPost } from '@/routes/posts';
 import { index as updatesIndex } from '@/routes/updates';
 import type { BreadcrumbItem } from '@/types';
 import type { Post } from '@/types/post';
@@ -50,7 +51,12 @@ export default function ShowPost({ post }: { post: Post }) {
                             </p>
                         )}
 
-                        <div>
+                        <div className="flex gap-2">
+                            <Button asChild size="sm">
+                                <Link href={editPost({ post: post.id }).url}>
+                                    Edit
+                                </Link>
+                            </Button>
                             <Button asChild variant="outline" size="sm">
                                 <Link href={updatesIndex().url}>
                                     Back to updates
