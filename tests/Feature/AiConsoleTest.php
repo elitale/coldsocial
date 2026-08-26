@@ -27,6 +27,22 @@ function aiConsoleMenu(): array
 /**
  * @return array<string, string>
  */
+function aiPresetOptions(): array
+{
+    return [
+        'openai' => 'OpenAI',
+        'openrouter' => 'OpenRouter',
+        'anthropic' => 'Anthropic',
+        'gemini' => 'Google Gemini',
+        'github' => 'GitHub Models',
+        'custom' => 'Custom (enter details manually)',
+        '__cancel__' => '← Cancel',
+    ];
+}
+
+/**
+ * @return array<string, string>
+ */
 function aiDriverOptions(): array
 {
     return [
@@ -38,86 +54,6 @@ function aiDriverOptions(): array
         'other' => 'Other…',
     ];
 }
-
-test('the ai console exits cleanly', function () {
-    $this->artisan('ai')
-        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
-        ->assertSuccessful();
-});
-
-test('the ai console adds a provider through the menu', function () {
-    $this->artisan('ai')
-        ->expectsChoice('What would you like to do?', 'provider:add', aiConsoleMenu())
-        ->expectsQuestion('Provider name', 'OpenAI')
-        ->expectsChoice('Driver', 'openai', aiDriverOptions())
-        ->expectsQuestion('API key (optional)', 'sk-secret')
-        ->expectsQuestion('Base URL (optional)', '')
-        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
-        ->assertSuccessful();
-
-    $provider = AiProvider::where('slug', 'openai')->sole();
-    expect($provider->driver)->toBe('openai')
-        ->and($provider->api_key)->toBe('sk-secret');
-});
-
-test('the ai console sets the default model through the menu', function () {
-    $provider = AiProvider::factory()->create(['slug' => 'openai']);
-    $old = AiModel::factory()->for($provider, 'provider')->capability(AiCapability::Text)->default()->create(['identifier' => 'gpt-4o-mini']);
-    $new = AiModel::factory()->for($provider, 'provider')->capability(AiCapability::Text)->create(['identifier' => 'gpt-4o']);
-
-    $this->artisan('ai')
-        ->expectsChoice('What would you like to do?', 'model:default', aiConsoleMenu())
-        ->expectsChoice('Capability', 'text', capabilityChoices())
-        ->expectsChoice('Default model', (string) $new->id, [
-            (string) $old->id => 'openai / gpt-4o-mini (current)',
-            (string) $new->id => 'openai / gpt-4o',
-        ])
-        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
-        ->assertSuccessful();
-
-    expect($new->fresh()->is_default)->toBeTrue()
-        ->and($old->fresh()->is_default)->toBeFalse();
-});
-
-test('the ai console lists the provider models when adding a model', function () {
-    Http::fake(['https://openrouter.ai/api/v1/models' => Http::response([
-        'data' => [['id' => 'openai/gpt-4o'], ['id' => 'x/y']],
-    ])]);
-
-    AiProvider::factory()->create(['slug' => 'or', 'name' => 'OpenRouter', 'driver' => 'openrouter', 'base_url' => null]);
-
-    $this->artisan('ai')
-        ->expectsChoice('What would you like to do?', 'model:add', aiConsoleMenu())
-        ->expectsChoice('Provider', 'or', ['or' => 'OpenRouter'])
-        ->expectsChoice('Capability', 'text', capabilityChoices())
-        ->expectsChoice('Model', 'openai/gpt-4o', [
-            'openai/gpt-4o' => 'openai/gpt-4o',
-            'x/y' => 'x/y',
-            '__manual__' => 'Enter manually…',
-        ])
-        ->expectsConfirmation('Make this the default text model?', 'no')
-        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
-        ->assertSuccessful();
-
-    expect(AiModel::where('identifier', 'openai/gpt-4o')->exists())->toBeTrue();
-});
-
-test('the ai console tests a model through the menu', function () {
-    Http::fake(['https://openrouter.ai/api/v1/chat/completions' => Http::response([
-        'choices' => [['message' => ['content' => 'pong']]],
-    ])]);
-
-    $provider = AiProvider::factory()->create(['slug' => 'or', 'name' => 'OpenRouter', 'driver' => 'openrouter', 'base_url' => null]);
-    $model = AiModel::factory()->for($provider, 'provider')->capability(AiCapability::Text)->create(['identifier' => 'x/y']);
-
-    $this->artisan('ai')
-        ->expectsChoice('What would you like to do?', 'model:test', aiConsoleMenu())
-        ->expectsChoice('Model to test', (string) $model->id, [
-            (string) $model->id => 'or / x/y (text)',
-        ])
-        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
-        ->assertSuccessful();
-});
 
 /**
  * @return array<string, string>
@@ -132,3 +68,136 @@ function capabilityChoices(): array
 
     return $choices;
 }
+
+test('the ai console guides a first-time admin straight into adding a provider', function () {
+    // No providers yet → the preset picker is the very first prompt (not the menu).
+    $this->artisan('ai')
+        ->expectsChoice('Which provider?', '__cancel__', aiPresetOptions())
+        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
+        ->assertSuccessful();
+
+    expect(AiProvider::count())->toBe(0);
+});
+
+test('the ai console shows a status line then exits', function () {
+    $provider = AiProvider::factory()->create(['slug' => 'or', 'name' => 'OpenRouter']);
+    AiModel::factory()->for($provider, 'provider')->capability(AiCapability::Text)->default()->create(['identifier' => 'gpt-4o']);
+
+    $this->artisan('ai')
+        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
+        ->expectsOutputToContain('Providers:')
+        ->expectsOutputToContain('gpt-4o')
+        ->assertSuccessful();
+});
+
+test('the ai console adds a provider from a preset (driver + base URL auto-filled)', function () {
+    AiProvider::factory()->create(['slug' => 'seed', 'name' => 'Seed']); // avoid the first-run flow
+
+    $this->artisan('ai')
+        ->expectsChoice('What would you like to do?', 'provider:add', aiConsoleMenu())
+        ->expectsChoice('Which provider?', 'openrouter', aiPresetOptions())
+        ->expectsQuestion('A name for this provider', 'OpenRouter')
+        ->expectsQuestion('API key', 'sk-secret')
+        ->expectsConfirmation('Test the connection now?', 'no')
+        ->expectsConfirmation('Add a model from this provider now?', 'no')
+        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
+        ->assertSuccessful();
+
+    $provider = AiProvider::where('slug', 'openrouter')->sole();
+    expect($provider->driver)->toBe('openrouter')
+        ->and($provider->api_key)->toBe('sk-secret')
+        ->and($provider->base_url)->toBeNull();
+});
+
+test('the ai console adds a custom provider with a manual driver + base URL', function () {
+    AiProvider::factory()->create(['slug' => 'seed', 'name' => 'Seed']);
+
+    $this->artisan('ai')
+        ->expectsChoice('What would you like to do?', 'provider:add', aiConsoleMenu())
+        ->expectsChoice('Which provider?', 'custom', aiPresetOptions())
+        ->expectsChoice('Driver', 'openai', aiDriverOptions())
+        ->expectsQuestion('Base URL (optional)', 'https://my.host/v1')
+        ->expectsQuestion('Provider name', 'My Host')
+        ->expectsQuestion('API key', 'sk-x')
+        ->expectsConfirmation('Test the connection now?', 'no')
+        ->expectsConfirmation('Add a model from this provider now?', 'no')
+        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
+        ->assertSuccessful();
+
+    $provider = AiProvider::where('slug', 'my-host')->sole();
+    expect($provider->driver)->toBe('openai')
+        ->and($provider->base_url)->toBe('https://my.host/v1');
+});
+
+test('the ai console searches the provider models when adding a model', function () {
+    Http::fake(['https://openrouter.ai/api/v1/models' => Http::response([
+        'data' => [['id' => 'openai/gpt-4o'], ['id' => 'x/y']],
+    ])]);
+
+    AiProvider::factory()->create(['slug' => 'or', 'name' => 'OpenRouter', 'driver' => 'openrouter', 'base_url' => null]);
+
+    $this->artisan('ai')
+        ->expectsChoice('What would you like to do?', 'model:add', aiConsoleMenu())
+        ->expectsChoice('Provider', 'or', ['or' => 'OpenRouter', '__cancel__' => '← Cancel'])
+        ->expectsChoice('Capability', 'text', capabilityChoices())
+        ->expectsSearch('Model (type to filter)', 'openai/gpt-4o', 'gpt', [
+            'openai/gpt-4o' => 'openai/gpt-4o',
+            '__manual__' => 'Enter manually…',
+        ])
+        ->expectsConfirmation('Make this the default text model?', 'no')
+        ->expectsConfirmation('Test this model now?', 'no')
+        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
+        ->assertSuccessful();
+
+    expect(AiModel::where('identifier', 'openai/gpt-4o')->exists())->toBeTrue();
+});
+
+test('the ai console sets the default model through the menu', function () {
+    $provider = AiProvider::factory()->create(['slug' => 'openai']);
+    $old = AiModel::factory()->for($provider, 'provider')->capability(AiCapability::Text)->default()->create(['identifier' => 'gpt-4o-mini']);
+    $new = AiModel::factory()->for($provider, 'provider')->capability(AiCapability::Text)->create(['identifier' => 'gpt-4o']);
+
+    $this->artisan('ai')
+        ->expectsChoice('What would you like to do?', 'model:default', aiConsoleMenu())
+        ->expectsChoice('Capability', 'text', capabilityChoices())
+        ->expectsChoice('Default model', (string) $new->id, [
+            (string) $old->id => 'openai / gpt-4o-mini (current)',
+            (string) $new->id => 'openai / gpt-4o',
+            '__cancel__' => '← Cancel',
+        ])
+        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
+        ->assertSuccessful();
+
+    expect($new->fresh()->is_default)->toBeTrue()
+        ->and($old->fresh()->is_default)->toBeFalse();
+});
+
+test('the ai console tests a model through the menu', function () {
+    Http::fake(['https://openrouter.ai/api/v1/chat/completions' => Http::response([
+        'choices' => [['message' => ['content' => 'pong']]],
+    ])]);
+
+    $provider = AiProvider::factory()->create(['slug' => 'or', 'name' => 'OpenRouter', 'driver' => 'openrouter', 'base_url' => null]);
+    $model = AiModel::factory()->for($provider, 'provider')->capability(AiCapability::Text)->create(['identifier' => 'x/y']);
+
+    $this->artisan('ai')
+        ->expectsChoice('What would you like to do?', 'model:test', aiConsoleMenu())
+        ->expectsChoice('Model to test', (string) $model->id, [
+            (string) $model->id => 'or / x/y (text)',
+            '__cancel__' => '← Cancel',
+        ])
+        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
+        ->assertSuccessful();
+});
+
+test('cancelling the provider picker writes nothing', function () {
+    AiProvider::factory()->create(['slug' => 'or', 'name' => 'OpenRouter']);
+
+    $this->artisan('ai')
+        ->expectsChoice('What would you like to do?', 'model:add', aiConsoleMenu())
+        ->expectsChoice('Provider', '__cancel__', ['or' => 'OpenRouter', '__cancel__' => '← Cancel'])
+        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
+        ->assertSuccessful();
+
+    expect(AiModel::count())->toBe(0);
+});
