@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, UserRound } from 'lucide-react';
+import { LayoutGrid, Newspaper, UserRound } from 'lucide-react';
 
 import AppLogoIcon from '@/components/app-logo-icon';
 import { NavUser } from '@/components/nav-user';
@@ -16,11 +16,13 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { edit as editPersona } from '@/routes/onboarding';
+import { index as updatesIndex } from '@/routes/updates';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     { title: 'Dashboard', href: dashboard().url, icon: LayoutGrid },
     { title: 'Persona', href: editPersona().url, icon: UserRound },
+    { title: 'Updates', href: updatesIndex().url, icon: Newspaper },
 ];
 
 export function AppSidebar() {
