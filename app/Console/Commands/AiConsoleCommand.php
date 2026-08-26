@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Ai\ModelCatalog;
+use App\Ai\ProviderRequestException;
 use App\Enums\AiCapability;
 use App\Models\AiModel;
 use App\Models\AiProvider;
@@ -32,6 +34,7 @@ class AiConsoleCommand extends Command
                     'model:default' => 'Set the default model for a capability',
                     'provider:list' => 'List providers',
                     'model:list' => 'List models',
+                    'provider:test' => 'Test a provider connection',
                     'provider:toggle' => 'Enable or disable a provider',
                     'provider:remove' => 'Remove a provider',
                     'exit' => 'Exit',
@@ -45,6 +48,7 @@ class AiConsoleCommand extends Command
                 'model:default' => $this->setDefaultModel(),
                 'provider:list' => $this->call('ai:provider:list'),
                 'model:list' => $this->call('ai:model:list'),
+                'provider:test' => $this->testProvider(),
                 'provider:toggle' => $this->toggleProvider(),
                 'provider:remove' => $this->removeProvider(),
                 default => null,
@@ -80,11 +84,12 @@ class AiConsoleCommand extends Command
             return;
         }
 
+        $provider = AiProvider::where('slug', $slug)->firstOrFail();
         $capability = select('Capability', $this->capabilityChoices());
 
         $options = [
             'provider' => $slug,
-            '--identifier' => text('Model identifier', required: true, placeholder: 'gpt-4o'),
+            '--identifier' => $this->pickModelIdentifier($provider),
             '--capability' => $capability,
         ];
 
@@ -149,6 +154,47 @@ class AiConsoleCommand extends Command
         }
 
         $this->call('ai:provider:remove', ['slug' => $slug, '--force' => true]);
+    }
+
+    private function pickModelIdentifier(AiProvider $provider): string
+    {
+        $catalog = app(ModelCatalog::class);
+
+        if ($catalog->supports($provider)) {
+            try {
+                $this->info("Verifying key and fetching models from {$provider->name}…");
+                $models = $catalog->models($provider);
+            } catch (ProviderRequestException $e) {
+                warning($e->getMessage());
+                $models = [];
+            }
+
+            if ($models !== []) {
+                $manual = '__manual__';
+                $choice = (string) select(
+                    label: 'Model',
+                    options: [...array_combine($models, $models), $manual => 'Enter manually…'],
+                    scroll: 15,
+                );
+
+                if ($choice !== $manual) {
+                    return $choice;
+                }
+            }
+        }
+
+        return text('Model identifier', required: true, placeholder: 'gpt-4o');
+    }
+
+    private function testProvider(): void
+    {
+        $slug = $this->pickProvider();
+
+        if ($slug === null) {
+            return;
+        }
+
+        $this->call('ai:provider:test', ['slug' => $slug]);
     }
 
     private function pickDriver(): string

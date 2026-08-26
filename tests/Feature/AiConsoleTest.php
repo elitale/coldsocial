@@ -3,6 +3,7 @@
 use App\Enums\AiCapability;
 use App\Models\AiModel;
 use App\Models\AiProvider;
+use Illuminate\Support\Facades\Http;
 
 /**
  * @return array<string, string>
@@ -15,6 +16,7 @@ function aiConsoleMenu(): array
         'model:default' => 'Set the default model for a capability',
         'provider:list' => 'List providers',
         'model:list' => 'List models',
+        'provider:test' => 'Test a provider connection',
         'provider:toggle' => 'Enable or disable a provider',
         'provider:remove' => 'Remove a provider',
         'exit' => 'Exit',
@@ -74,6 +76,29 @@ test('the ai console sets the default model through the menu', function () {
 
     expect($new->fresh()->is_default)->toBeTrue()
         ->and($old->fresh()->is_default)->toBeFalse();
+});
+
+test('the ai console lists the provider models when adding a model', function () {
+    Http::fake(['https://openrouter.ai/api/v1/models' => Http::response([
+        'data' => [['id' => 'openai/gpt-4o'], ['id' => 'x/y']],
+    ])]);
+
+    AiProvider::factory()->create(['slug' => 'or', 'name' => 'OpenRouter', 'driver' => 'openrouter', 'base_url' => null]);
+
+    $this->artisan('ai')
+        ->expectsChoice('What would you like to do?', 'model:add', aiConsoleMenu())
+        ->expectsChoice('Provider', 'or', ['or' => 'OpenRouter'])
+        ->expectsChoice('Capability', 'text', capabilityChoices())
+        ->expectsChoice('Model', 'openai/gpt-4o', [
+            'openai/gpt-4o' => 'openai/gpt-4o',
+            'x/y' => 'x/y',
+            '__manual__' => 'Enter manually…',
+        ])
+        ->expectsConfirmation('Make this the default text model?', 'no')
+        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
+        ->assertSuccessful();
+
+    expect(AiModel::where('identifier', 'openai/gpt-4o')->exists())->toBeTrue();
 });
 
 /**

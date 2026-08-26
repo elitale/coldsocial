@@ -23,12 +23,19 @@ Statuses: `Discovered` → `Scoped` → `Building` → `InReview` → `Merged` �
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0002 | Project foundation: theme, shadcn/ui, auth | Merged | [plan](../.plan/0002-project-foundation-theme-shadcn-auth.md) | [#1](https://github.com/elitale/coldsocial/issues/1) | [#2](https://github.com/elitale/coldsocial/pull/2) | Product Developer | Merged to main; dashboard + sidebar included; CI green on Postgres |
 | 0003 | User persona intake (onboarding wizard) | Merged | [plan](../.plan/0003-user-persona-intake.md) | [#3](https://github.com/elitale/coldsocial/issues/3) | [#4](https://github.com/elitale/coldsocial/pull/4) | Product Developer | Merged; Persona model + wizard (social links first, custom links, "what we think about you" summary) + sidebar/user-menu links |
-| 0025 | AI provider & model registry + CLI | InReview | [plan](../.plan/0025-ai-provider-registry.md) | [#29](https://github.com/elitale/coldsocial/issues/29) | [#45](https://github.com/elitale/coldsocial/pull/45) | Product Developer | Groundwork (AI tracker #43, Phase A): AiProvider/AiModel + AiCapability enum; encrypted+hidden api_key; single default per capability. Folded in the full artisan CLI (#31 add/list/enable/disable/remove, #32 add/list/default) plus an interactive `php artisan ai` menu console (Laravel Prompts) so no command names need memorising. Attribute `#[Signature]` commands. CI green (63 tests) |
+| 0025 | AI provider & model registry + CLI | InReview | [plan](../.plan/0025-ai-provider-registry.md) | [#29](https://github.com/elitale/coldsocial/issues/29) | [#45](https://github.com/elitale/coldsocial/pull/45) | Product Developer | Groundwork (AI tracker #43, Phase A): AiProvider/AiModel + AiCapability enum; encrypted+hidden api_key; single default per capability. Folded in the full artisan CLI (#31 add/list/enable/disable/remove, #32 add/list/default) plus an interactive `php artisan ai` menu console (Laravel Prompts) so no command names need memorising. Attribute `#[Signature]` commands. Plus a provider model catalog: on add-model it verifies the API key and lists the provider's live models to pick (OpenAI-compatible `/models`; `ai:provider:test`). CI green (69 tests) |
 
 ---
 
 ## Decisions
 
+- **2026-08-26 — Dev runs on Sail; the test suite runs on the host (127.0.0.1).** `.env` keeps
+  `DB_HOST=pgsql` for Sail (`sail artisan …`, app served on :80). The Pest suite is pinned to
+  `DB_HOST=127.0.0.1` via `force="true"` in `phpunit.xml` (CI parity — CI's Postgres is a
+  127.0.0.1 service — and host runs), so run `composer ci:check` / `php artisan test` from the
+  **host**, not `sail artisan test` (inside the container 127.0.0.1 isn't the `pgsql` service).
+  VS Code inherited a stray exported `DB_HOST=pgsql`; the phpunit `force` overrides it for host
+  test runs, and Sail ignores it (container reads `.env`).
 - **2026-08-26 — AI provider layer starts with a DB registry (feature 0025).** `AiProvider`
   (encrypted, hidden `api_key`) hasMany `AiModel`; `AiModel.capability` is the `AiCapability`
   enum (`text|thinking|image|video|tts|stt`). Exactly one default model per capability is

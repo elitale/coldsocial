@@ -4,6 +4,7 @@ use App\Enums\AiCapability;
 use App\Models\AiModel;
 use App\Models\AiProvider;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 test('ai:provider:add creates a provider with an encrypted key and never prints it', function () {
     $this->artisan('ai:provider:add', [
@@ -114,4 +115,20 @@ test('ai:provider:remove --force deletes the provider and its models', function 
 
     expect(AiProvider::count())->toBe(0)
         ->and(AiModel::count())->toBe(0);
+});
+
+test('ai:provider:test reports a valid key', function () {
+    Http::fake(['https://openrouter.ai/api/v1/models' => Http::response(['data' => [['id' => 'x/y']]])]);
+    AiProvider::factory()->create(['slug' => 'or', 'name' => 'OpenRouter', 'driver' => 'openrouter', 'base_url' => null]);
+
+    $this->artisan('ai:provider:test', ['slug' => 'or'])
+        ->assertSuccessful()
+        ->expectsOutputToContain('key accepted');
+});
+
+test('ai:provider:test fails when the key is rejected', function () {
+    Http::fake(['*' => Http::response([], 401)]);
+    AiProvider::factory()->create(['slug' => 'or', 'driver' => 'openrouter', 'base_url' => null]);
+
+    $this->artisan('ai:provider:test', ['slug' => 'or'])->assertFailed();
 });
