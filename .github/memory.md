@@ -25,10 +25,24 @@ Statuses: `Discovered` → `Scoped` → `Building` → `InReview` → `Merged` �
 | 0003 | User persona intake (onboarding wizard) | Merged | [plan](../.plan/0003-user-persona-intake.md) | [#3](https://github.com/elitale/coldsocial/issues/3) | [#4](https://github.com/elitale/coldsocial/pull/4) | Product Developer | Merged; Persona model + wizard (social links first, custom links, "what we think about you" summary) + sidebar/user-menu links |
 | 0025 | AI provider & model registry + CLI | InReview | [plan](../.plan/0025-ai-provider-registry.md) | [#29](https://github.com/elitale/coldsocial/issues/29) | [#45](https://github.com/elitale/coldsocial/pull/45) | Product Developer | Groundwork (AI tracker #43, Phase A): AiProvider/AiModel + AiCapability enum; encrypted+hidden api_key; single default per capability. Folded in the full artisan CLI (#31 add/list/enable/disable/remove, #32 add/list/default) plus an interactive `php artisan ai` menu console (Laravel Prompts) so no command names need memorising. Attribute `#[Signature]` commands. Plus a provider model catalog: on add-model it verifies the API key and lists the provider's live models to pick (OpenAI-compatible `/models`; `ai:provider:test`). `ai:model:test` sends a real chat round-trip for text/thinking models (image/video/tts/stt report "not wired up yet" until their drivers land). CI green (77 tests) |
 | 0026 | Friendlier `php artisan ai` admin console | InReview | [plan](../.plan/0026-ai-console-admin-ux.md) | _n/a_ | [#45](https://github.com/elitale/coldsocial/pull/45) | Product Developer | Admin-DX polish on the 0025 console (same branch/PR): guided first-run (auto-opens add-provider when none exist), status header (provider counts + default models per capability), provider presets that auto-fill the driver (openai/openrouter/anthropic/gemini/github), searchable model picker (`search()`) when the provider exposes a catalog, chained next-steps after add-provider (test connection → add model → test model), and a Cancel entry on every picker. CI green (80 tests / 240 assertions) |
+| 0027 | GitHub Copilot provider (VS Code device flow) | InReview | [plan](../.plan/0027-github-copilot-device-flow.md) | _pending_ | [#45](https://github.com/elitale/coldsocial/pull/45) | Product Developer | Adds a `copilot` driver + `php artisan ai:provider:copilot`: runs GitHub's OAuth **device flow** (`GithubDeviceFlow`, uses `Illuminate\Support\Sleep` so tests fake the wait), stores the returned GitHub OAuth token as the encrypted provider `api_key`. Per request, `CopilotToken` exchanges that token for a short-lived Copilot token (cached until just before `expires_at`) and adds editor headers, all behind a new `ProviderRequest` auth seam so the existing OpenAI-compatible catalog/chat/tester hit `https://api.githubcopilot.com` unchanged. Console gains a "GitHub Copilot (device login)" preset. Identity (client id + editor versions) in `config/services.github_copilot`. CI green (86 tests / 267 assertions) |
 
 ---
 
 ## Decisions
+
+- **2026-08-26 — GitHub Copilot authenticates with the VS Code device flow, not a pasted key
+  (feature 0027).** `ai:provider:copilot` runs GitHub's OAuth device flow and stores the returned
+  GitHub OAuth token as the encrypted `AiProvider.api_key` (driver `copilot`, base URL resolves to
+  `https://api.githubcopilot.com`). Copilot needs a *short-lived* token per call, so `CopilotToken`
+  exchanges the OAuth token at `copilot_internal/v2/token` and caches it until just before
+  `expires_at`. The one place that knows an auth style differs is `ProviderRequest` (a single
+  `driver === 'copilot'` branch): static bearer key for everyone else, exchanged token + editor
+  headers for Copilot. Chat + catalog (two consumers) inject `ProviderRequest`, so Copilot needed
+  **no** Copilot-specific catalog/chat code — its `/models` + `/chat/completions` are OpenAI-shaped.
+  Deliberately **not** a strategy interface (only two styles today → KISS/YAGNI; promote when a
+  third lands). Editor identity (client id, editor/plugin versions, integration id, user agent)
+  lives in `config/services.github_copilot`; the GitHub endpoints are class constants.
 
 - **2026-08-26 — Dev runs on Sail; the test suite runs on the host (127.0.0.1).** `.env` keeps
   `DB_HOST=pgsql` for Sail (`sail artisan …`, app served on :80). The Pest suite is pinned to
