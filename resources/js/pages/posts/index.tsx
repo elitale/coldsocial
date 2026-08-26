@@ -46,6 +46,13 @@ export default function PostsIndex({ posts }: { posts: Post[] }) {
                                     className="flex min-w-0 flex-col gap-1"
                                 >
                                     <span className="flex items-center gap-2">
+                                        {post.status === 'approved' ? (
+                                            <Badge>Approved</Badge>
+                                        ) : (
+                                            <Badge variant="outline">
+                                                Draft
+                                            </Badge>
+                                        )}
                                         <Badge
                                             variant="secondary"
                                             className="uppercase"
