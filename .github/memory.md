@@ -22,12 +22,19 @@ Statuses: `Discovered` → `Scoped` → `Building` → `InReview` → `Merged` �
 | # | Feature | Status | Plan | Issue | PR | Owner (agent) | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0002 | Project foundation: theme, shadcn/ui, auth | Merged | [plan](../.plan/0002-project-foundation-theme-shadcn-auth.md) | [#1](https://github.com/elitale/coldsocial/issues/1) | [#2](https://github.com/elitale/coldsocial/pull/2) | Product Developer | Merged to main; dashboard + sidebar included; CI green on Postgres |
-| 0003 | User persona intake (onboarding wizard) | InReview | [plan](../.plan/0003-user-persona-intake.md) | [#3](https://github.com/elitale/coldsocial/issues/3) | [#4](https://github.com/elitale/coldsocial/pull/4) | Product Developer | Implemented: Persona model + 6-step shadcn wizard + sidebar/user-menu links; CI green (41 tests) |
+| 0003 | User persona intake (onboarding wizard) | Merged | [plan](../.plan/0003-user-persona-intake.md) | [#3](https://github.com/elitale/coldsocial/issues/3) | [#4](https://github.com/elitale/coldsocial/pull/4) | Product Developer | Merged; Persona model + wizard (social links first, custom links, "what we think about you" summary) + sidebar/user-menu links |
+| 0025 | AI provider & model registry | InReview | [plan](../.plan/0025-ai-provider-registry.md) | [#29](https://github.com/elitale/coldsocial/issues/29) | [#45](https://github.com/elitale/coldsocial/pull/45) | Product Developer | Groundwork (AI tracker #43, Phase A): AiProvider/AiModel + AiCapability enum; encrypted+hidden api_key; single default per capability; 5 Pest tests; CI green (50 tests) |
 
 ---
 
 ## Decisions
 
+- **2026-08-26 — AI provider layer starts with a DB registry (feature 0025).** `AiProvider`
+  (encrypted, hidden `api_key`) hasMany `AiModel`; `AiModel.capability` is the `AiCapability`
+  enum (`text|thinking|image|video|tts|stt`). Exactly one default model per capability is
+  enforced in `AiModel::booted()`'s `saved` hook via a mass `update()` (bypasses model events,
+  so no recursion). The manager, drivers, artisan commands, and fallback chain build on this
+  (issues #30–#44, tracker #43).
 - **2026-08-26 — Switched to a sidebar app shell (supersedes the earlier header-shell choice).**
   Per user request the authenticated app now uses the shadcn `sidebar` (collapsible icon rail):
   `AppSidebar` (brand + nav + user footer via `NavUser`) inside `SidebarProvider`, with a
