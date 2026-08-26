@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'github_copilot' => [
+        // Public OAuth client id for the VS Code-style device flow (not a secret). Override the
+        // identity below if GitHub tightens verification against a specific editor build.
+        'client_id' => env('GITHUB_COPILOT_CLIENT_ID', 'Iv1.b507a08c87ecfe98'),
+        'editor_version' => env('GITHUB_COPILOT_EDITOR_VERSION', 'vscode/1.95.0'),
+        'plugin_version' => env('GITHUB_COPILOT_PLUGIN_VERSION', 'copilot-chat/0.23.0'),
+        'integration_id' => env('GITHUB_COPILOT_INTEGRATION_ID', 'vscode-chat'),
+        'user_agent' => env('GITHUB_COPILOT_USER_AGENT', 'GitHubCopilotChat/0.23.0'),
+    ],
+
 ];

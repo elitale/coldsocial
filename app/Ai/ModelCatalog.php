@@ -11,7 +11,7 @@ class ModelCatalog
      *
      * @var list<string>
      */
-    private const OPENAI_COMPATIBLE = ['openai', 'openrouter', 'github'];
+    private const OPENAI_COMPATIBLE = ['openai', 'openrouter', 'github', 'copilot'];
 
     public function __construct(private readonly OpenAiCompatibleCatalog $openAiCompatible) {}
 

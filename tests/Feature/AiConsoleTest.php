@@ -4,6 +4,7 @@ use App\Enums\AiCapability;
 use App\Models\AiModel;
 use App\Models\AiProvider;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Sleep;
 
 /**
  * @return array<string, string>
@@ -35,6 +36,7 @@ function aiPresetOptions(): array
         'anthropic' => 'Anthropic',
         'gemini' => 'Google Gemini',
         'github' => 'GitHub Models',
+        'copilot' => 'GitHub Copilot (device login)',
         'custom' => 'Custom (enter details manually)',
         '__cancel__' => '← Cancel',
     ];
@@ -48,7 +50,7 @@ function aiDriverOptions(): array
     return [
         'openai' => 'OpenAI (OpenAI-compatible)',
         'openrouter' => 'OpenRouter',
-        'github' => 'GitHub Models / Copilot',
+        'github' => 'GitHub Models',
         'anthropic' => 'Anthropic',
         'gemini' => 'Google Gemini',
         'other' => 'Other…',
@@ -127,6 +129,36 @@ test('the ai console adds a custom provider with a manual driver + base URL', fu
     $provider = AiProvider::where('slug', 'my-host')->sole();
     expect($provider->driver)->toBe('openai')
         ->and($provider->base_url)->toBe('https://my.host/v1');
+});
+
+test('the ai console adds GitHub Copilot through the device-login preset', function () {
+    Sleep::fake();
+    Http::fake([
+        'https://github.com/login/device/code' => Http::response([
+            'device_code' => 'dev-123',
+            'user_code' => 'ABCD-1234',
+            'verification_uri' => 'https://github.com/login/device',
+            'interval' => 1,
+            'expires_in' => 900,
+        ]),
+        'https://github.com/login/oauth/access_token' => Http::response(['access_token' => 'gho_console_token']),
+    ]);
+
+    AiProvider::factory()->create(['slug' => 'seed', 'name' => 'Seed']); // avoid the first-run flow
+
+    $this->artisan('ai')
+        ->expectsChoice('What would you like to do?', 'provider:add', aiConsoleMenu())
+        ->expectsChoice('Which provider?', 'copilot', aiPresetOptions())
+        ->expectsQuestion('A name for this provider', 'GitHub Copilot')
+        ->expectsConfirmation('Test the connection now?', 'no')
+        ->expectsConfirmation('Add a model from this provider now?', 'no')
+        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
+        ->assertSuccessful();
+
+    $provider = AiProvider::where('slug', 'github-copilot')->sole();
+    expect($provider->driver)->toBe('copilot')
+        ->and($provider->api_key)->toBe('gho_console_token')
+        ->and($provider->base_url)->toBeNull();
 });
 
 test('the ai console searches the provider models when adding a model', function () {

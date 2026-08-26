@@ -114,12 +114,19 @@ class AiConsoleCommand extends Command
             $presetOptions[$key] = $preset['name'];
         }
 
+        $presetOptions['copilot'] = 'GitHub Copilot (device login)';
         $presetOptions['custom'] = 'Custom (enter details manually)';
         $presetOptions['__cancel__'] = '← Cancel';
 
         $preset = (string) select('Which provider?', $presetOptions);
 
         if ($preset === '__cancel__') {
+            return;
+        }
+
+        if ($preset === 'copilot') {
+            $this->addCopilotProvider();
+
             return;
         }
 
@@ -146,6 +153,15 @@ class AiConsoleCommand extends Command
         }
 
         if ($this->call('ai:provider:add', $options) === self::SUCCESS) {
+            $this->offerNextStepsForProvider($name);
+        }
+    }
+
+    private function addCopilotProvider(): void
+    {
+        $name = text('A name for this provider', default: 'GitHub Copilot', required: true);
+
+        if ($this->call('ai:provider:copilot', ['--name' => $name]) === self::SUCCESS) {
             $this->offerNextStepsForProvider($name);
         }
     }
@@ -367,7 +383,7 @@ class AiConsoleCommand extends Command
         $driver = (string) select('Driver', [
             'openai' => 'OpenAI (OpenAI-compatible)',
             'openrouter' => 'OpenRouter',
-            'github' => 'GitHub Models / Copilot',
+            'github' => 'GitHub Models',
             'anthropic' => 'Anthropic',
             'gemini' => 'Google Gemini',
             'other' => 'Other…',

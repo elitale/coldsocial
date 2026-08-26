@@ -15,6 +15,7 @@ final class OpenAiCompatible
         'openai' => 'https://api.openai.com/v1',
         'openrouter' => 'https://openrouter.ai/api/v1',
         'github' => 'https://models.github.ai/inference',
+        'copilot' => 'https://api.githubcopilot.com',
     ];
 
     /**

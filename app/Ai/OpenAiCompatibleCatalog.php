@@ -4,17 +4,17 @@ namespace App\Ai;
 
 use App\Models\AiProvider;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
 
 class OpenAiCompatibleCatalog implements ListsModels
 {
+    public function __construct(private readonly ProviderRequest $request) {}
+
     public function models(AiProvider $provider): array
     {
         $baseUrl = OpenAiCompatible::baseUrl($provider);
 
         try {
-            $response = Http::withToken((string) $provider->api_key)
-                ->acceptJson()
+            $response = $this->request->for($provider)
                 ->timeout(15)
                 ->get("{$baseUrl}/models");
         } catch (ConnectionException $e) {

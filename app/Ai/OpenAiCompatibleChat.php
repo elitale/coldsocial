@@ -4,10 +4,11 @@ namespace App\Ai;
 
 use App\Models\AiModel;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Http;
 
 class OpenAiCompatibleChat
 {
+    public function __construct(private readonly ProviderRequest $request) {}
+
     /**
      * Send a chat completion and return the assistant's reply.
      *
@@ -19,8 +20,7 @@ class OpenAiCompatibleChat
         $baseUrl = OpenAiCompatible::baseUrl($provider);
 
         try {
-            $response = Http::withToken((string) $provider->api_key)
-                ->acceptJson()
+            $response = $this->request->for($provider)
                 ->timeout(30)
                 ->post("{$baseUrl}/chat/completions", [
                     'model' => $model->identifier,
