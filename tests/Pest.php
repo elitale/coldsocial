@@ -16,6 +16,10 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
+    ->beforeEach(function () {
+        // Feature tests render Inertia pages as HTML; stub Vite so they don't need a build.
+        $this->withoutVite();
+    })
     ->in('Feature');
 
 /*
