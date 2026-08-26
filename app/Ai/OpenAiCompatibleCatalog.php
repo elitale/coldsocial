@@ -8,24 +8,9 @@ use Illuminate\Support\Facades\Http;
 
 class OpenAiCompatibleCatalog implements ListsModels
 {
-    /**
-     * Default `/models` endpoints for known OpenAI-compatible drivers.
-     *
-     * @var array<string, string>
-     */
-    private const DEFAULT_BASE_URLS = [
-        'openai' => 'https://api.openai.com/v1',
-        'openrouter' => 'https://openrouter.ai/api/v1',
-        'github' => 'https://models.github.ai/inference',
-    ];
-
     public function models(AiProvider $provider): array
     {
-        $baseUrl = rtrim($provider->base_url ?: (self::DEFAULT_BASE_URLS[$provider->driver] ?? ''), '/');
-
-        if ($baseUrl === '') {
-            throw new ProviderRequestException('No base URL is configured for this provider.');
-        }
+        $baseUrl = OpenAiCompatible::baseUrl($provider);
 
         try {
             $response = Http::withToken((string) $provider->api_key)

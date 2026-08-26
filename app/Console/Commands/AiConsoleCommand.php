@@ -34,6 +34,7 @@ class AiConsoleCommand extends Command
                     'model:default' => 'Set the default model for a capability',
                     'provider:list' => 'List providers',
                     'model:list' => 'List models',
+                    'model:test' => 'Test a model',
                     'provider:test' => 'Test a provider connection',
                     'provider:toggle' => 'Enable or disable a provider',
                     'provider:remove' => 'Remove a provider',
@@ -48,6 +49,7 @@ class AiConsoleCommand extends Command
                 'model:default' => $this->setDefaultModel(),
                 'provider:list' => $this->call('ai:provider:list'),
                 'model:list' => $this->call('ai:model:list'),
+                'model:test' => $this->testModel(),
                 'provider:test' => $this->testProvider(),
                 'provider:toggle' => $this->toggleProvider(),
                 'provider:remove' => $this->removeProvider(),
@@ -195,6 +197,37 @@ class AiConsoleCommand extends Command
         }
 
         $this->call('ai:provider:test', ['slug' => $slug]);
+    }
+
+    private function testModel(): void
+    {
+        $models = AiModel::with('provider')->orderBy('capability')->orderBy('identifier')->get();
+
+        if ($models->isEmpty()) {
+            warning('No models yet — add one first.');
+
+            return;
+        }
+
+        $id = (int) select(
+            label: 'Model to test',
+            options: $models->mapWithKeys(fn (AiModel $model): array => [
+                (string) $model->id => "{$model->provider->slug} / {$model->identifier} ({$model->capability->value})",
+            ])->all(),
+            scroll: 15,
+        );
+
+        $model = $models->firstWhere('id', $id);
+
+        if (! $model instanceof AiModel) {
+            return;
+        }
+
+        $this->call('ai:model:test', [
+            'identifier' => $model->identifier,
+            '--provider' => $model->provider->slug,
+            '--capability' => $model->capability->value,
+        ]);
     }
 
     private function pickDriver(): string

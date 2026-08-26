@@ -16,6 +16,7 @@ function aiConsoleMenu(): array
         'model:default' => 'Set the default model for a capability',
         'provider:list' => 'List providers',
         'model:list' => 'List models',
+        'model:test' => 'Test a model',
         'provider:test' => 'Test a provider connection',
         'provider:toggle' => 'Enable or disable a provider',
         'provider:remove' => 'Remove a provider',
@@ -99,6 +100,23 @@ test('the ai console lists the provider models when adding a model', function ()
         ->assertSuccessful();
 
     expect(AiModel::where('identifier', 'openai/gpt-4o')->exists())->toBeTrue();
+});
+
+test('the ai console tests a model through the menu', function () {
+    Http::fake(['https://openrouter.ai/api/v1/chat/completions' => Http::response([
+        'choices' => [['message' => ['content' => 'pong']]],
+    ])]);
+
+    $provider = AiProvider::factory()->create(['slug' => 'or', 'name' => 'OpenRouter', 'driver' => 'openrouter', 'base_url' => null]);
+    $model = AiModel::factory()->for($provider, 'provider')->capability(AiCapability::Text)->create(['identifier' => 'x/y']);
+
+    $this->artisan('ai')
+        ->expectsChoice('What would you like to do?', 'model:test', aiConsoleMenu())
+        ->expectsChoice('Model to test', (string) $model->id, [
+            (string) $model->id => 'or / x/y (text)',
+        ])
+        ->expectsChoice('What would you like to do?', 'exit', aiConsoleMenu())
+        ->assertSuccessful();
 });
 
 /**
