@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\PostStatus;
+use App\Models\Persona;
 use App\Models\Post;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia;
@@ -18,7 +19,7 @@ test('a new draft starts unapproved', function () {
 });
 
 test('a user can approve their draft', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for($user)->create();
 
     $this->actingAs($user)->post(route('posts.approve', $post))
@@ -28,7 +29,7 @@ test('a user can approve their draft', function () {
 });
 
 test('a user can send an approved post back to draft', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for($user)->approved()->create();
 
     $this->actingAs($user)->post(route('posts.unapprove', $post))
@@ -38,7 +39,7 @@ test('a user can send an approved post back to draft', function () {
 });
 
 test('a user cannot approve another user\'s draft', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for(User::factory())->create();
 
     $this->actingAs($user)->post(route('posts.approve', $post))->assertForbidden();
@@ -47,7 +48,7 @@ test('a user cannot approve another user\'s draft', function () {
 });
 
 test('the library exposes each post status', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     Post::factory()->for($user)->approved()->create();
 
     $this->actingAs($user)->get(route('posts.index'))

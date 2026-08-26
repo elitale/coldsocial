@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Persona;
 use App\Models\Update;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia;
@@ -9,7 +10,7 @@ test('guests are redirected from the updates page', function () {
 });
 
 test('a user can capture an update', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
 
     $this->actingAs($user)
         ->post(route('updates.store'), [
@@ -25,7 +26,7 @@ test('a user can capture an update', function () {
 });
 
 test('the body is required', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
 
     $this->actingAs($user)
         ->from(route('updates.index'))
@@ -36,7 +37,7 @@ test('the body is required', function () {
 });
 
 test('an invalid source url is rejected', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
 
     $this->actingAs($user)
         ->from(route('updates.index'))
@@ -45,7 +46,7 @@ test('an invalid source url is rejected', function () {
 });
 
 test('the index lists only the current user\'s updates', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     Update::factory()->for($user)->create(['body' => 'Mine']);
     Update::factory()->for(User::factory())->create(['body' => 'Theirs']);
 
@@ -60,7 +61,7 @@ test('the index lists only the current user\'s updates', function () {
 });
 
 test('a user can delete their own update', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $update = Update::factory()->for($user)->create();
 
     $this->actingAs($user)
@@ -71,7 +72,7 @@ test('a user can delete their own update', function () {
 });
 
 test('a user cannot delete another user\'s update', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $update = Update::factory()->for(User::factory())->create();
 
     $this->actingAs($user)

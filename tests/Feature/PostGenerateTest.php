@@ -3,6 +3,7 @@
 use App\Enums\AiCapability;
 use App\Models\AiModel;
 use App\Models\AiProvider;
+use App\Models\Persona;
 use App\Models\Post;
 use App\Models\Update;
 use App\Models\User;
@@ -34,7 +35,7 @@ test('a user generates a LinkedIn draft from their update', function () {
     seedDefaultTextModel();
     fakeChatReply('Big news: we shipped! 🚀');
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $update = Update::factory()->for($user)->create(['body' => 'We launched our new API today.']);
 
     $response = $this->actingAs($user)->post(route('posts.store'), ['update_id' => $update->id]);
@@ -52,7 +53,7 @@ test('generation feeds the update text into the model prompt', function () {
     seedDefaultTextModel();
     fakeChatReply('Draft');
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $update = Update::factory()->for($user)->create(['body' => 'UNIQUE-SEED-TEXT']);
 
     $this->actingAs($user)->post(route('posts.store'), ['update_id' => $update->id]);
@@ -64,7 +65,7 @@ test('a user cannot generate from another user\'s update', function () {
     seedDefaultTextModel();
     Http::fake();
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $foreign = Update::factory()->for(User::factory())->create();
 
     $this->actingAs($user)->post(route('posts.store'), ['update_id' => $foreign->id])
@@ -77,7 +78,7 @@ test('a user cannot generate from another user\'s update', function () {
 test('generation fails gracefully when no text model is configured', function () {
     Http::fake();
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $update = Update::factory()->for($user)->create();
 
     $this->actingAs($user)
@@ -90,7 +91,7 @@ test('generation fails gracefully when no text model is configured', function ()
 });
 
 test('a user can view their own draft', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for($user)->create(['body' => 'My draft body']);
 
     $this->actingAs($user)->get(route('posts.show', $post))
@@ -102,7 +103,7 @@ test('a user can view their own draft', function () {
 });
 
 test('a user cannot view another user\'s draft', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for(User::factory())->create();
 
     $this->actingAs($user)->get(route('posts.show', $post))->assertForbidden();
