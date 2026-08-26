@@ -14,6 +14,16 @@ use Inertia\Response;
 class PostController extends Controller
 {
     /**
+     * List the user's drafts, newest first.
+     */
+    public function index(Request $request): Response
+    {
+        return Inertia::render('posts/index', [
+            'posts' => $request->user()->posts()->latest()->get(),
+        ]);
+    }
+
+    /**
      * Generate a LinkedIn draft from one of the user's updates.
      */
     public function store(GeneratePostRequest $request, GenerateLinkedInDraft $draft): RedirectResponse
@@ -39,5 +49,17 @@ class PostController extends Controller
         return Inertia::render('posts/show', [
             'post' => $post->load('sourceUpdate'),
         ]);
+    }
+
+    /**
+     * Delete one of the user's drafts.
+     */
+    public function destroy(Request $request, Post $post): RedirectResponse
+    {
+        abort_unless($post->user_id === $request->user()->id, 403);
+
+        $post->delete();
+
+        return to_route('posts.index');
     }
 }
