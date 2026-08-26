@@ -2,10 +2,10 @@
 
 ## Metadata
 
-- **Status:** Building
+- **Status:** InReview
 - **Sequence / slug:** `0029` / `capture-updates`
 - **Branch:** `feature/0029-capture-updates` (stacked on 0028)
-- **Issue:** #7 · **PR:** _pending_
+- **Issue:** #7 · **PR:** #47
 - **ICP persona:** Priya (solo founder) — has news to share but no time to write it up
 - **Target platform(s):** n/a (raw material; platform-agnostic)
 - **Depends on:** 0028 (branch base); generation (#8) will consume these updates
