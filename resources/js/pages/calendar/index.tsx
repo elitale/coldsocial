@@ -72,6 +72,8 @@ export default function CalendarIndex({
 }: CalendarProps) {
     const monthStart = parseMonth(month);
     const todayDate = parseDay(today);
+    const rangeStart = new Date(todayDate.getFullYear() - 2, 0, 1);
+    const rangeEnd = new Date(todayDate.getFullYear() + 5, 11, 1);
 
     // Keep an explicit pick, but fall back to a sensible default whenever the
     // shown month changes (the old pick no longer belongs to it).
@@ -131,6 +133,9 @@ export default function CalendarIndex({
                         selected={selected}
                         onSelect={handleSelect}
                         today={todayDate}
+                        captionLayout="dropdown"
+                        startMonth={rangeStart}
+                        endMonth={rangeEnd}
                         showOutsideDays={false}
                         modifiers={{ scheduled: scheduledDates }}
                         className="rounded-lg border shadow-sm"
