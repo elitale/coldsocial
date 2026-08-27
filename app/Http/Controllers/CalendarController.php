@@ -38,13 +38,8 @@ class CalendarController extends Controller
 
         return Inertia::render('calendar/index', [
             'month' => $monthStart->format('Y-m'),
-            'monthLabel' => $monthStart->translatedFormat('F Y'),
             'timezone' => $timezone,
-            'firstWeekday' => $monthStart->dayOfWeek,
-            'daysInMonth' => $monthStart->daysInMonth,
             'today' => Carbon::now($timezone)->format('Y-m-d'),
-            'prevMonth' => $monthStart->clone()->subMonth()->format('Y-m'),
-            'nextMonth' => $monthStart->clone()->addMonth()->format('Y-m'),
             'postsByDay' => $this->groupByLocalDay($posts, $timezone),
         ]);
     }

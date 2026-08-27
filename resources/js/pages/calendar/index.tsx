@@ -1,8 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Calendar, CalendarDayButton } from '@/components/ui/calendar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { index as calendarIndex } from '@/routes/calendar';
 import { show as showPost } from '@/routes/posts';
@@ -11,8 +12,6 @@ import type { BreadcrumbItem } from '@/types';
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Calendar', href: calendarIndex().url },
 ];
-
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 interface CalendarPost {
     id: number;
@@ -24,144 +23,172 @@ interface CalendarPost {
 
 interface CalendarProps {
     month: string;
-    monthLabel: string;
     timezone: string;
-    firstWeekday: number;
-    daysInMonth: number;
     today: string;
-    prevMonth: string;
-    nextMonth: string;
     postsByDay: Record<string, CalendarPost[]>;
+}
+
+function pad(value: number): string {
+    return String(value).padStart(2, '0');
+}
+
+function parseMonth(month: string): Date {
+    const [year, monthNumber] = month.split('-').map(Number);
+
+    return new Date(year, monthNumber - 1, 1);
+}
+
+function parseDay(day: string): Date {
+    const [year, monthNumber, dayNumber] = day.split('-').map(Number);
+
+    return new Date(year, monthNumber - 1, dayNumber);
+}
+
+function toDayKey(date: Date): string {
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function toMonthKey(date: Date): string {
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
+}
+
+function isSameMonth(a: Date, b: Date): boolean {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+}
+
+function formatDayLabel(date: Date): string {
+    return date.toLocaleDateString(undefined, {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+    });
 }
 
 export default function CalendarIndex({
     month,
-    monthLabel,
     timezone,
-    firstWeekday,
-    daysInMonth,
     today,
-    prevMonth,
-    nextMonth,
     postsByDay,
 }: CalendarProps) {
-    const cells: (number | null)[] = [
-        ...Array.from({ length: firstWeekday }, () => null),
-        ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
-    ];
+    const monthStart = parseMonth(month);
+    const todayDate = parseDay(today);
 
-    while (cells.length % 7 !== 0) {
-        cells.push(null);
+    // Keep an explicit pick, but fall back to a sensible default whenever the
+    // shown month changes (the old pick no longer belongs to it).
+    const [pickedDay, setPickedDay] = React.useState<Date | null>(null);
+
+    const defaultDay = isSameMonth(todayDate, monthStart)
+        ? todayDate
+        : monthStart;
+    const selected =
+        pickedDay && isSameMonth(pickedDay, monthStart)
+            ? pickedDay
+            : defaultDay;
+
+    const scheduledDates = Object.keys(postsByDay).map(parseDay);
+    const selectedPosts = postsByDay[toDayKey(selected)] ?? [];
+
+    function goToMonth(next: Date): void {
+        router.get(
+            calendarIndex({ query: { month: toMonthKey(next) } }).url,
+            {},
+            { preserveScroll: true, preserveState: false },
+        );
+    }
+
+    function handleSelect(date: Date | undefined): void {
+        if (date) {
+            setPickedDay(date);
+        }
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Calendar" />
 
-            <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 p-4">
+            <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-4">
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-lg font-semibold">{monthLabel}</h1>
+                        <h1 className="text-lg font-semibold">Calendar</h1>
                         <p className="text-sm text-muted-foreground">
                             Scheduled posts, shown in {timezone}.
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="icon" asChild>
-                            <Link
-                                href={
-                                    calendarIndex({
-                                        query: { month: prevMonth },
-                                    }).url
-                                }
-                                aria-label="Previous month"
-                            >
-                                <ChevronLeft className="size-4" />
-                            </Link>
-                        </Button>
-                        <Button variant="outline" size="sm" asChild>
-                            <Link href={calendarIndex().url}>Today</Link>
-                        </Button>
-                        <Button variant="outline" size="icon" asChild>
-                            <Link
-                                href={
-                                    calendarIndex({
-                                        query: { month: nextMonth },
-                                    }).url
-                                }
-                                aria-label="Next month"
-                            >
-                                <ChevronRight className="size-4" />
-                            </Link>
-                        </Button>
-                    </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => goToMonth(new Date())}
+                    >
+                        Today
+                    </Button>
                 </div>
 
-                <Card>
-                    <CardContent className="p-0">
-                        <div className="grid grid-cols-7 border-b text-center text-xs font-medium text-muted-foreground">
-                            {WEEKDAYS.map((day) => (
-                                <div key={day} className="py-2">
-                                    {day}
-                                </div>
-                            ))}
-                        </div>
-                        <div className="grid grid-cols-7">
-                            {cells.map((day, index) => {
-                                if (day === null) {
-                                    return (
-                                        <div
-                                            key={`empty-${index}`}
-                                            className="min-h-24 border-r border-b bg-muted/30 [&:nth-child(7n)]:border-r-0"
-                                        />
-                                    );
-                                }
-
-                                const dateKey = `${month}-${String(day).padStart(2, '0')}`;
-                                const dayPosts = postsByDay[dateKey] ?? [];
-                                const isToday = dateKey === today;
+                <div className="flex flex-col gap-4 md:flex-row md:items-start">
+                    <Calendar
+                        mode="single"
+                        month={monthStart}
+                        onMonthChange={goToMonth}
+                        selected={selected}
+                        onSelect={handleSelect}
+                        today={todayDate}
+                        showOutsideDays={false}
+                        modifiers={{ scheduled: scheduledDates }}
+                        className="rounded-lg border shadow-sm"
+                        components={{
+                            DayButton: (
+                                dayProps: React.ComponentProps<
+                                    typeof CalendarDayButton
+                                >,
+                            ) => {
+                                const count =
+                                    postsByDay[toDayKey(dayProps.day.date)]
+                                        ?.length ?? 0;
 
                                 return (
-                                    <div
-                                        key={dateKey}
-                                        className="flex min-h-24 flex-col gap-1 border-r border-b p-1.5 [&:nth-child(7n)]:border-r-0"
-                                    >
-                                        <span
-                                            className={
-                                                isToday
-                                                    ? 'flex size-6 items-center justify-center self-start rounded-full bg-primary text-xs font-semibold text-primary-foreground'
-                                                    : 'flex size-6 items-center justify-center self-start text-xs font-medium text-muted-foreground'
-                                            }
-                                        >
-                                            {day}
-                                        </span>
-                                        {dayPosts.map((post) => (
-                                            <Link
-                                                key={post.id}
-                                                href={
-                                                    showPost({ post: post.id })
-                                                        .url
-                                                }
-                                                title={post.excerpt}
-                                                className="flex flex-col rounded-md border bg-card px-1.5 py-1 text-left text-xs transition-colors hover:bg-accent"
-                                            >
-                                                <span className="font-medium">
-                                                    {post.time}{' '}
-                                                    <span className="text-muted-foreground uppercase">
-                                                        {post.platform}
-                                                    </span>
-                                                </span>
-                                                <span className="truncate text-muted-foreground">
-                                                    {post.excerpt}
-                                                </span>
-                                            </Link>
-                                        ))}
-                                    </div>
+                                    <CalendarDayButton {...dayProps}>
+                                        {dayProps.children}
+                                        {count > 0 ? (
+                                            <span className="size-1 rounded-full bg-current" />
+                                        ) : null}
+                                    </CalendarDayButton>
                                 );
-                            })}
-                        </div>
-                    </CardContent>
-                </Card>
+                            },
+                        }}
+                    />
+
+                    <Card className="flex-1">
+                        <CardHeader>
+                            <CardTitle className="text-base">
+                                {formatDayLabel(selected)}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col gap-2">
+                            {selectedPosts.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">
+                                    No posts scheduled for this day.
+                                </p>
+                            ) : (
+                                selectedPosts.map((post) => (
+                                    <Link
+                                        key={post.id}
+                                        href={showPost({ post: post.id }).url}
+                                        className="flex flex-col gap-1 rounded-md border p-3 text-sm transition-colors hover:bg-accent"
+                                    >
+                                        <span className="flex items-center gap-2 font-medium">
+                                            {post.time}
+                                            <span className="text-xs text-muted-foreground uppercase">
+                                                {post.platform}
+                                            </span>
+                                        </span>
+                                        <span className="line-clamp-2 text-muted-foreground">
+                                            {post.excerpt}
+                                        </span>
+                                    </Link>
+                                ))
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </AppLayout>
     );

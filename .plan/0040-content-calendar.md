@@ -66,16 +66,17 @@ where we can see what post has been scheduled on that day."
 - **No migration** — reads `posts.scheduled_at` (from #14).
 - **`CalendarController@index`:** resolves the user's tz; parses `?month` (validated `Y-m`, else
   current month); queries the user's `scheduled_at` posts within the month's UTC bounds; groups them
-  by **local** day (`Y-m-d`) → `postsByDay`. Also returns `month`, `monthLabel`, `firstWeekday`,
-  `daysInMonth`, `today`, `prevMonth`, `nextMonth`, `timezone`.
+  by **local** day (`Y-m-d`) → `postsByDay`. Also returns `month`, `today`, `timezone`.
 - **Route:** `GET /calendar` → `calendar.index` (auth + verified + persona group).
 
 ## Frontend (Inertia v3 + React)
 
-- **`calendar/index.tsx`:** builds the grid from `firstWeekday` + `daysInMonth` (dependency-free —
-  no date library); renders weekday headers, day cells, and per-day post chips (time + platform +
-  excerpt) linking to `posts.show`; prev/today/next via `calendarIndex({ query: { month } })`;
-  today highlighted.
+- **`calendar/index.tsx`:** renders the shadcn **`Calendar`** (react-day-picker) in `single`
+  select mode, controlled by the server `month`; month nav (`onMonthChange`) does an Inertia visit
+  to `?month=YYYY-MM`; scheduled days show a dot (custom `DayButton`); the user's `today` is
+  highlighted. A side panel lists the **selected day's** posts (time + platform + excerpt) linking
+  to `posts.show`. Day placement is device-timezone-safe (Dates built via `new Date(y, m, d)`).
+- **`components/ui/calendar.tsx`:** the shadcn Calendar component (added via the shadcn CLI).
 - **Sidebar:** add a **Calendar** item.
 
 ## Security & privacy
@@ -95,7 +96,8 @@ inertia-react-development · tailwindcss-development · wayfinder-development ·
 
 ## Dependencies / new packages
 
-- none (deliberately no date library — the grid is built from integer day math).
+- `react-day-picker` + `date-fns` — pulled in by the shadcn `Calendar` component (user asked for
+  the shadcn calendar UI).
 
 ## Definition of Done
 
