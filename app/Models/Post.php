@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
  * @property string $platform
  * @property PostStatus $status
  * @property string $body
+ * @property Carbon|null $scheduled_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read User $user
@@ -35,6 +36,7 @@ class Post extends Model
     {
         return [
             'status' => PostStatus::class,
+            'scheduled_at' => 'datetime',
         ];
     }
 

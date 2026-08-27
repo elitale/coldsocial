@@ -1,6 +1,7 @@
 import { Form, Head, Link } from '@inertiajs/react';
 
 import InputError from '@/components/input-error';
+import { PostStatusBadge } from '@/components/post-status-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +12,9 @@ import {
     approve,
     edit as editPost,
     regenerate,
+    schedule,
     unapprove,
+    unschedule,
 } from '@/routes/posts';
 import { index as updatesIndex } from '@/routes/updates';
 import type { BreadcrumbItem } from '@/types';
@@ -22,7 +25,23 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Draft', href: '#' },
 ];
 
-export default function ShowPost({ post }: { post: Post }) {
+function formatDateTime(iso: string, timezone: string): string {
+    return new Date(iso).toLocaleString(undefined, {
+        timeZone: timezone,
+        dateStyle: 'medium',
+        timeStyle: 'short',
+    });
+}
+
+export default function ShowPost({
+    post,
+    timezone,
+    scheduledInput,
+}: {
+    post: Post;
+    timezone: string;
+    scheduledInput: string | null;
+}) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Draft post" />
@@ -32,11 +51,7 @@ export default function ShowPost({ post }: { post: Post }) {
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Your LinkedIn draft</CardTitle>
                         <div className="flex items-center gap-2">
-                            {post.status === 'approved' ? (
-                                <Badge>Approved</Badge>
-                            ) : (
-                                <Badge variant="outline">Draft</Badge>
-                            )}
+                            <PostStatusBadge status={post.status} />
                             <Badge variant="secondary" className="uppercase">
                                 {post.platform}
                             </Badge>
@@ -114,6 +129,90 @@ export default function ShowPost({ post }: { post: Post }) {
                         </div>
                     </CardContent>
                 </Card>
+
+                {(post.status === 'approved' ||
+                    post.status === 'scheduled') && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Schedule</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col gap-4">
+                            {post.status === 'scheduled' &&
+                                post.scheduled_at && (
+                                    <p className="text-sm">
+                                        Scheduled for{' '}
+                                        <span className="font-medium">
+                                            {formatDateTime(
+                                                post.scheduled_at,
+                                                timezone,
+                                            )}
+                                        </span>{' '}
+                                        <span className="text-muted-foreground">
+                                            ({timezone})
+                                        </span>
+                                    </p>
+                                )}
+                            <Form
+                                action={schedule.url({ post: post.id })}
+                                method="post"
+                                options={{ preserveScroll: true }}
+                                className="flex flex-col gap-3"
+                            >
+                                {({ processing, errors }) => (
+                                    <>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="scheduled_at">
+                                                {post.status === 'scheduled'
+                                                    ? 'Reschedule for'
+                                                    : 'Pick a date & time'}
+                                            </Label>
+                                            <Input
+                                                id="scheduled_at"
+                                                name="scheduled_at"
+                                                type="datetime-local"
+                                                defaultValue={
+                                                    scheduledInput ?? ''
+                                                }
+                                                required
+                                            />
+                                            <InputError
+                                                message={errors.scheduled_at}
+                                            />
+                                        </div>
+                                        <div>
+                                            <Button
+                                                type="submit"
+                                                disabled={processing}
+                                            >
+                                                {post.status === 'scheduled'
+                                                    ? 'Reschedule'
+                                                    : 'Schedule'}
+                                            </Button>
+                                        </div>
+                                    </>
+                                )}
+                            </Form>
+                            {post.status === 'scheduled' && (
+                                <Form
+                                    action={unschedule.url({ post: post.id })}
+                                    method="post"
+                                    options={{ preserveScroll: true }}
+                                >
+                                    {({ processing }) => (
+                                        <Button
+                                            type="submit"
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={processing}
+                                        >
+                                            Unschedule
+                                        </Button>
+                                    )}
+                                </Form>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
 
                 <Card>
                     <CardHeader>

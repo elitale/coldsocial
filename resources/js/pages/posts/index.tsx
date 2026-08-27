@@ -1,6 +1,7 @@
 import { Form, Head, Link } from '@inertiajs/react';
 
 import InputError from '@/components/input-error';
+import { PostStatusBadge } from '@/components/post-status-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -65,13 +66,7 @@ export default function PostsIndex({ posts }: { posts: Post[] }) {
                                     className="flex min-w-0 flex-col gap-1"
                                 >
                                     <span className="flex items-center gap-2">
-                                        {post.status === 'approved' ? (
-                                            <Badge>Approved</Badge>
-                                        ) : (
-                                            <Badge variant="outline">
-                                                Draft
-                                            </Badge>
-                                        )}
+                                        <PostStatusBadge status={post.status} />
                                         <Badge
                                             variant="secondary"
                                             className="uppercase"
