@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UpdateController;
@@ -33,6 +34,8 @@ Route::middleware(['auth', 'verified', EnsurePersonaIsComplete::class])->group(f
     Route::post('posts/{post}/schedule', [PostController::class, 'schedule'])->name('posts.schedule');
     Route::post('posts/{post}/unschedule', [PostController::class, 'unschedule'])->name('posts.unschedule');
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+    Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
 });
 
 require __DIR__.'/settings.php';
