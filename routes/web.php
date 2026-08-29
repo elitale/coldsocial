@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UpdateController;
@@ -36,6 +37,10 @@ Route::middleware(['auth', 'verified', EnsurePersonaIsComplete::class])->group(f
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
     Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
+
+    Route::get('connections', [ConnectionController::class, 'index'])->name('connections.index');
+    Route::get('connections/{platform}/redirect', [ConnectionController::class, 'redirect'])->name('connections.redirect');
+    Route::get('connections/{platform}/callback', [ConnectionController::class, 'callback'])->name('connections.callback');
 });
 
 require __DIR__.'/settings.php';

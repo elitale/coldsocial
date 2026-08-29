@@ -4,6 +4,7 @@ import {
     FileText,
     LayoutGrid,
     Newspaper,
+    Plug,
     UserRound,
 } from 'lucide-react';
 
@@ -22,6 +23,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index as calendarIndex } from '@/routes/calendar';
+import { index as connectionsIndex } from '@/routes/connections';
 import { edit as editPersona } from '@/routes/onboarding';
 import { index as postsIndex } from '@/routes/posts';
 import { index as updatesIndex } from '@/routes/updates';
@@ -33,6 +35,7 @@ const mainNavItems: NavItem[] = [
     { title: 'Updates', href: updatesIndex().url, icon: Newspaper },
     { title: 'Posts', href: postsIndex().url, icon: FileText },
     { title: 'Calendar', href: calendarIndex().url, icon: CalendarDays },
+    { title: 'Connections', href: connectionsIndex().url, icon: Plug },
 ];
 
 export function AppSidebar() {
