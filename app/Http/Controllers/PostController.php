@@ -10,9 +10,11 @@ use App\Enums\PostStatus;
 use App\Http\Requests\GeneratePostRequest;
 use App\Http\Requests\PostUpdateRequest;
 use App\Http\Requests\RegeneratePostRequest;
+use App\Http\Requests\SchedulePostRequest;
 use App\Models\Post;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -65,8 +67,12 @@ class PostController extends Controller
     {
         abort_unless($post->user_id === $request->user()->id, 403);
 
+        $timezone = $request->user()->timezone ?? 'UTC';
+
         return Inertia::render('posts/show', [
             'post' => $post->load('sourceUpdate'),
+            'timezone' => $timezone,
+            'scheduledInput' => $post->scheduled_at?->clone()->setTimezone($timezone)->format('Y-m-d\TH:i'),
         ]);
     }
 
@@ -131,6 +137,45 @@ class PostController extends Controller
         abort_unless($post->user_id === $request->user()->id, 403);
 
         $post->status = PostStatus::Draft;
+        $post->save();
+
+        return to_route('posts.show', $post);
+    }
+
+    /**
+     * Schedule an approved post for a date & time (interpreted in the user's timezone).
+     */
+    public function schedule(SchedulePostRequest $request, Post $post): RedirectResponse
+    {
+        abort_unless($post->user_id === $request->user()->id, 403);
+
+        if (! in_array($post->status, [PostStatus::Approved, PostStatus::Scheduled], true)) {
+            return back()->withErrors(['scheduled_at' => 'Only approved posts can be scheduled.']);
+        }
+
+        $timezone = $request->user()->timezone ?? 'UTC';
+        $scheduledAt = Carbon::parse($request->string('scheduled_at')->toString(), $timezone)->utc();
+
+        if ($scheduledAt->isPast()) {
+            return back()->withErrors(['scheduled_at' => 'Choose a time in the future.']);
+        }
+
+        $post->status = PostStatus::Scheduled;
+        $post->scheduled_at = $scheduledAt;
+        $post->save();
+
+        return to_route('posts.show', $post);
+    }
+
+    /**
+     * Return a scheduled post to approved (unscheduled).
+     */
+    public function unschedule(Request $request, Post $post): RedirectResponse
+    {
+        abort_unless($post->user_id === $request->user()->id, 403);
+
+        $post->status = PostStatus::Approved;
+        $post->scheduled_at = null;
         $post->save();
 
         return to_route('posts.show', $post);
