@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\PostController;
@@ -31,7 +32,11 @@ Route::middleware(['auth', 'verified', EnsurePersonaIsComplete::class])->group(f
     Route::post('posts/{post}/regenerate', [PostController::class, 'regenerate'])->name('posts.regenerate');
     Route::post('posts/{post}/approve', [PostController::class, 'approve'])->name('posts.approve');
     Route::post('posts/{post}/unapprove', [PostController::class, 'unapprove'])->name('posts.unapprove');
+    Route::post('posts/{post}/schedule', [PostController::class, 'schedule'])->name('posts.schedule');
+    Route::post('posts/{post}/unschedule', [PostController::class, 'unschedule'])->name('posts.unschedule');
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+    Route::get('calendar', [CalendarController::class, 'index'])->name('calendar.index');
 
     Route::get('connections', [ConnectionController::class, 'index'])->name('connections.index');
     Route::get('connections/{platform}/redirect', [ConnectionController::class, 'redirect'])->name('connections.redirect');
