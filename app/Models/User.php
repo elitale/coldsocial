@@ -66,4 +66,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Post::class);
     }
+
+    /**
+     * @return HasMany<PlatformConnection, $this>
+     */
+    public function connections(): HasMany
+    {
+        return $this->hasMany(PlatformConnection::class);
+    }
 }

@@ -35,6 +35,12 @@ return [
         ],
     ],
 
+    'linkedin' => [
+        'client_id' => env('LINKEDIN_CLIENT_ID'),
+        'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
+        'redirect' => env('LINKEDIN_REDIRECT_URI'),
+    ],
+
     'github_copilot' => [
         // Public OAuth client id for the VS Code-style device flow (not a secret). Override the
         // identity below if GitHub tightens verification against a specific editor build.

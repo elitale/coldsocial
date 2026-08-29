@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UpdateController;
@@ -31,6 +32,10 @@ Route::middleware(['auth', 'verified', EnsurePersonaIsComplete::class])->group(f
     Route::post('posts/{post}/approve', [PostController::class, 'approve'])->name('posts.approve');
     Route::post('posts/{post}/unapprove', [PostController::class, 'unapprove'])->name('posts.unapprove');
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+    Route::get('connections', [ConnectionController::class, 'index'])->name('connections.index');
+    Route::get('connections/{platform}/redirect', [ConnectionController::class, 'redirect'])->name('connections.redirect');
+    Route::get('connections/{platform}/callback', [ConnectionController::class, 'callback'])->name('connections.callback');
 });
 
 require __DIR__.'/settings.php';
