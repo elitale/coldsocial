@@ -130,3 +130,17 @@ test('the connect flow uses stored credentials over config', function () {
     expect($url)->toContain('client_id=stored-client-id')
         ->and($url)->toContain(urlencode('https://stored.example/callback'));
 });
+
+test('social:credential:disable then enable toggles the platform', function () {
+    PlatformCredential::factory()->create(['platform' => SocialPlatform::Linkedin]);
+
+    $this->artisan('social:credential:disable', ['platform' => 'linkedin'])->assertSuccessful();
+    expect(PlatformCredential::sole()->enabled)->toBeFalse();
+
+    $this->artisan('social:credential:enable', ['platform' => 'linkedin'])->assertSuccessful();
+    expect(PlatformCredential::sole()->enabled)->toBeTrue();
+});
+
+test('social:credential:enable fails when the platform has no credentials', function () {
+    $this->artisan('social:credential:enable', ['platform' => 'linkedin'])->assertFailed();
+});

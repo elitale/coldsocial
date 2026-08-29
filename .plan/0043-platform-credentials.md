@@ -23,10 +23,13 @@ CLI — mirroring the existing `php artisan ai` provider console.
 ## In scope — the smallest valuable slice
 
 - `platform_credentials` table + `PlatformCredential` model (one row per platform; **secret
-  encrypted + hidden**; `last_tested_at` + `test_passed` + `test_message`).
+  encrypted + hidden**; `enabled` flag; `last_tested_at` + `test_passed` + `test_message`).
 - Commands (attribute `#[Signature]` + Laravel Prompts):
-  `social:credential:set` / `:test` / `:list` / `:remove` + the `social` interactive console.
+  `social:credential:set` / `:test` / `:enable` / `:disable` / `:list` / `:remove` + a **menu-first**
+  `social` console with a per-platform status overview (no forced credential entry on first run).
 - `LinkedInOAuth` resolves credentials from the DB, falling back to `config/services`.
+- The hub shows a platform as **available** (Connect) only when it's connectable **and** has enabled
+  credentials (redirect enforces the same); otherwise Coming soon.
 
 ## Deliberately out of scope (YAGNI)
 

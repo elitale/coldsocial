@@ -23,9 +23,18 @@ class PlatformCredentialFactory extends Factory
             'client_id' => fake()->uuid(),
             'client_secret' => 'test-client-secret',
             'redirect_url' => 'https://coldsocial.test/connections/linkedin/callback',
+            'enabled' => true,
             'last_tested_at' => null,
             'test_passed' => null,
             'test_message' => null,
         ];
+    }
+
+    /**
+     * A disabled credential.
+     */
+    public function disabled(): static
+    {
+        return $this->state(['enabled' => false]);
     }
 }

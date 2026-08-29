@@ -3,6 +3,7 @@
 use App\Enums\SocialPlatform;
 use App\Models\Persona;
 use App\Models\PlatformConnection;
+use App\Models\PlatformCredential;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -14,6 +15,7 @@ test('guests are redirected to login', function () {
 
 test('the hub lists every platform with the right status', function () {
     $user = User::factory()->has(Persona::factory())->create();
+    PlatformCredential::factory()->create(['platform' => SocialPlatform::Linkedin]);
 
     $this->actingAs($user)
         ->get(route('connections.index'))
@@ -65,11 +67,25 @@ test('tokens are encrypted at rest and never sent to the client', function () {
 
 test('connecting LinkedIn redirects to the consent screen and stores state', function () {
     $user = User::factory()->has(Persona::factory())->create();
+    PlatformCredential::factory()->create(['platform' => SocialPlatform::Linkedin]);
 
     $response = $this->actingAs($user)->get(route('connections.redirect', ['platform' => 'linkedin']));
 
     $response->assertRedirectContains('linkedin.com/oauth/v2/authorization');
     $response->assertSessionHas('linkedin_oauth_state');
+});
+
+test('a platform without enabled credentials is not connectable', function () {
+    $user = User::factory()->has(Persona::factory())->create();
+    PlatformCredential::factory()->disabled()->create(['platform' => SocialPlatform::Linkedin]);
+
+    $this->actingAs($user)
+        ->get(route('connections.index'))
+        ->assertInertia(fn (AssertableInertia $page) => $page->where('platforms.0.status', 'coming_soon'));
+
+    $this->actingAs($user)
+        ->get(route('connections.redirect', ['platform' => 'linkedin']))
+        ->assertNotFound();
 });
 
 test('coming-soon and unknown platforms cannot start OAuth', function () {
