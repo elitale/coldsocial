@@ -4,6 +4,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\StudioController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Middleware\EnsurePersonaIsComplete;
 use Illuminate\Support\Facades\Auth;
@@ -42,6 +43,10 @@ Route::middleware(['auth', 'verified', EnsurePersonaIsComplete::class])->group(f
     Route::get('connections/{platform}/redirect', [ConnectionController::class, 'redirect'])->name('connections.redirect');
     Route::get('connections/{platform}/callback', [ConnectionController::class, 'callback'])->name('connections.callback');
     Route::delete('connections/{platform}', [ConnectionController::class, 'destroy'])->name('connections.destroy');
+
+    Route::get('studio', [StudioController::class, 'create'])->name('studio.create');
+    Route::post('studio/generate', [StudioController::class, 'generate'])->name('studio.generate');
+    Route::post('studio', [StudioController::class, 'store'])->name('studio.store');
 });
 
 require __DIR__.'/settings.php';

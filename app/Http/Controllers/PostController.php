@@ -6,6 +6,7 @@ use App\Ai\ProviderRequestException;
 use App\Content\GenerateLinkedInDraft;
 use App\Content\GenerateWeeklyDrafts;
 use App\Content\RewriteDraft;
+use App\Content\ScheduleTime;
 use App\Enums\PostStatus;
 use App\Http\Requests\GeneratePostRequest;
 use App\Http\Requests\PostUpdateRequest;
@@ -14,7 +15,6 @@ use App\Http\Requests\SchedulePostRequest;
 use App\Models\Post;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -154,9 +154,9 @@ class PostController extends Controller
         }
 
         $timezone = $request->user()->timezone ?? 'UTC';
-        $scheduledAt = Carbon::parse($request->string('scheduled_at')->toString(), $timezone)->utc();
+        $scheduledAt = ScheduleTime::fromUserInput($request->string('scheduled_at')->toString(), $timezone);
 
-        if ($scheduledAt->isPast()) {
+        if ($scheduledAt === null) {
             return back()->withErrors(['scheduled_at' => 'Choose a time in the future.']);
         }
 

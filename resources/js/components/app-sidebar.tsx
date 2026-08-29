@@ -5,6 +5,7 @@ import {
     LayoutGrid,
     Newspaper,
     Plug,
+    Sparkles,
     UserRound,
 } from 'lucide-react';
 
@@ -26,6 +27,7 @@ import { index as calendarIndex } from '@/routes/calendar';
 import { index as connectionsIndex } from '@/routes/connections';
 import { edit as editPersona } from '@/routes/onboarding';
 import { index as postsIndex } from '@/routes/posts';
+import { create as studioCreate } from '@/routes/studio';
 import { index as updatesIndex } from '@/routes/updates';
 import type { NavItem } from '@/types';
 
@@ -34,6 +36,7 @@ const mainNavItems: NavItem[] = [
     { title: 'Persona', href: editPersona().url, icon: UserRound },
     { title: 'Updates', href: updatesIndex().url, icon: Newspaper },
     { title: 'Posts', href: postsIndex().url, icon: FileText },
+    { title: 'Studio', href: studioCreate().url, icon: Sparkles },
     { title: 'Calendar', href: calendarIndex().url, icon: CalendarDays },
     { title: 'Connections', href: connectionsIndex().url, icon: Plug },
 ];
