@@ -2,6 +2,8 @@
 
 namespace App\Connections;
 
+use App\Enums\SocialPlatform;
+use App\Models\PlatformCredential;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 
@@ -27,8 +29,8 @@ class LinkedInOAuth
     {
         return self::AUTHORIZE_URL.'?'.http_build_query([
             'response_type' => 'code',
-            'client_id' => (string) config('services.linkedin.client_id'),
-            'redirect_uri' => (string) config('services.linkedin.redirect'),
+            'client_id' => $this->clientId(),
+            'redirect_uri' => $this->redirectUri(),
             'state' => $state,
             'scope' => implode(' ', self::SCOPES),
         ]);
@@ -44,9 +46,9 @@ class LinkedInOAuth
         $token = (array) Http::asForm()->post(self::TOKEN_URL, [
             'grant_type' => 'authorization_code',
             'code' => $code,
-            'redirect_uri' => (string) config('services.linkedin.redirect'),
-            'client_id' => (string) config('services.linkedin.client_id'),
-            'client_secret' => (string) config('services.linkedin.client_secret'),
+            'redirect_uri' => $this->redirectUri(),
+            'client_id' => $this->clientId(),
+            'client_secret' => $this->clientSecret(),
         ])->throw()->json();
 
         $accessToken = (string) ($token['access_token'] ?? '');
@@ -70,9 +72,70 @@ class LinkedInOAuth
     public function revoke(string $token): void
     {
         Http::asForm()->post(self::REVOKE_URL, [
-            'client_id' => (string) config('services.linkedin.client_id'),
-            'client_secret' => (string) config('services.linkedin.client_secret'),
+            'client_id' => $this->clientId(),
+            'client_secret' => $this->clientSecret(),
             'token' => $token,
         ])->throw();
+    }
+
+    /**
+     * Check whether a client id/secret pair is accepted by LinkedIn.
+     *
+     * @return array{passed: bool, message: string}
+     */
+    public function testCredentials(string $clientId, string $clientSecret): array
+    {
+        if ($clientId === '' || $clientSecret === '') {
+            return ['passed' => false, 'message' => 'Client id and secret are both required.'];
+        }
+
+        $response = Http::asForm()->post(self::TOKEN_URL, [
+            'grant_type' => 'client_credentials',
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+        ]);
+
+        if ($response->successful() && $response->json('access_token') !== null) {
+            return ['passed' => true, 'message' => 'LinkedIn issued a token — credentials are valid.'];
+        }
+
+        $error = (string) $response->json('error', '');
+
+        if ($error === 'invalid_client') {
+            return ['passed' => false, 'message' => 'LinkedIn rejected the client id or secret (invalid_client).'];
+        }
+
+        // Any non-"invalid_client" response means LinkedIn authenticated the app.
+        return [
+            'passed' => true,
+            'message' => 'LinkedIn recognised the credentials'.($error !== '' ? " ({$error})" : '').'.',
+        ];
+    }
+
+    private function credential(): ?PlatformCredential
+    {
+        return PlatformCredential::where('platform', SocialPlatform::Linkedin->value)->first();
+    }
+
+    private function clientId(): string
+    {
+        $credential = $this->credential();
+
+        return $credential ? $credential->client_id : (string) config('services.linkedin.client_id');
+    }
+
+    private function clientSecret(): string
+    {
+        $credential = $this->credential();
+
+        return $credential ? $credential->client_secret : (string) config('services.linkedin.client_secret');
+    }
+
+    private function redirectUri(): string
+    {
+        $credential = $this->credential();
+        $configured = (string) config('services.linkedin.redirect');
+
+        return $credential ? ($credential->redirect_url ?? $configured) : $configured;
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Connections\LinkedInOAuth;
 use App\Enums\SocialPlatform;
 use App\Models\PlatformConnection;
+use App\Models\PlatformCredential;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -21,15 +22,21 @@ class ConnectionController extends Controller
         $connections = $request->user()->connections()->get()
             ->keyBy(fn (PlatformConnection $connection): string => $connection->platform->value);
 
-        $platforms = array_map(function (SocialPlatform $platform) use ($connections): array {
+        $credentials = PlatformCredential::all()
+            ->keyBy(fn (PlatformCredential $credential): string => $credential->platform->value);
+
+        $platforms = array_map(function (SocialPlatform $platform) use ($connections, $credentials): array {
             $connection = $connections->get($platform->value);
+            $credential = $credentials->get($platform->value);
 
             return [
                 'key' => $platform->value,
                 'label' => $platform->label(),
-                'status' => $connection !== null
-                    ? 'connected'
-                    : ($platform->connectable() ? 'available' : 'coming_soon'),
+                'status' => match (true) {
+                    $connection !== null => 'connected',
+                    $platform->connectable() && $credential !== null && $credential->enabled => 'available',
+                    default => 'coming_soon',
+                },
                 'accountName' => $connection?->display_name,
             ];
         }, SocialPlatform::cases());
@@ -44,11 +51,20 @@ class ConnectionController extends Controller
     }
 
     /**
+     * A platform can be connected once it's connectable and has enabled credentials.
+     */
+    private function isConnectable(SocialPlatform $platform): bool
+    {
+        return $platform->connectable()
+            && PlatformCredential::where('platform', $platform)->where('enabled', true)->exists();
+    }
+
+    /**
      * Send the user to the platform's OAuth consent screen.
      */
     public function redirect(Request $request, SocialPlatform $platform, LinkedInOAuth $oauth): RedirectResponse
     {
-        abort_unless($platform->connectable(), 404);
+        abort_unless($this->isConnectable($platform), 404);
 
         $state = Str::random(40);
         $request->session()->put('linkedin_oauth_state', $state);
