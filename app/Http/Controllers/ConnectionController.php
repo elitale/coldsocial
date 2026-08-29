@@ -87,4 +87,25 @@ class ConnectionController extends Controller
         return to_route('connections.index')
             ->with('success', $platform->label().' connected as '.$profile['display_name'].'.');
     }
+
+    /**
+     * Disconnect a platform: best-effort token revoke, then delete the record.
+     */
+    public function destroy(Request $request, SocialPlatform $platform, LinkedInOAuth $oauth): RedirectResponse
+    {
+        $connection = $request->user()->connections()->where('platform', $platform)->first();
+
+        abort_unless($connection !== null, 404);
+
+        try {
+            $oauth->revoke($connection->access_token);
+        } catch (\Throwable) {
+            // Best-effort: a failed remote revoke must not block disconnecting locally.
+        }
+
+        $connection->delete();
+
+        return to_route('connections.index')
+            ->with('success', $platform->label().' disconnected.');
+    }
 }
