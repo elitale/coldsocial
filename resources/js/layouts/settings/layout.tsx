@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react';
 import Heading from '@/components/heading';
 import { cn } from '@/lib/utils';
 import { appearance } from '@/routes';
+import { edit as editPosting } from '@/routes/posting';
 import { edit as editProfile } from '@/routes/profile';
 import { edit as editPassword } from '@/routes/user-password';
 import type { NavItem } from '@/types';
@@ -12,6 +13,7 @@ const sidebarNavItems: NavItem[] = [
     { title: 'Profile', href: editProfile().url },
     { title: 'Password', href: editPassword().url },
     { title: 'Appearance', href: appearance().url },
+    { title: 'Posting', href: editPosting().url },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
