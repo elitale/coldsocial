@@ -35,4 +35,15 @@ class PostFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => ['status' => PostStatus::Approved]);
     }
+
+    /**
+     * Mark the post as scheduled for a future time.
+     */
+    public function scheduled(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => PostStatus::Scheduled,
+            'scheduled_at' => now()->addDay(),
+        ]);
+    }
 }

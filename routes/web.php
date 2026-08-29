@@ -30,6 +30,8 @@ Route::middleware(['auth', 'verified', EnsurePersonaIsComplete::class])->group(f
     Route::post('posts/{post}/regenerate', [PostController::class, 'regenerate'])->name('posts.regenerate');
     Route::post('posts/{post}/approve', [PostController::class, 'approve'])->name('posts.approve');
     Route::post('posts/{post}/unapprove', [PostController::class, 'unapprove'])->name('posts.unapprove');
+    Route::post('posts/{post}/schedule', [PostController::class, 'schedule'])->name('posts.schedule');
+    Route::post('posts/{post}/unschedule', [PostController::class, 'unschedule'])->name('posts.unschedule');
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 });
 
