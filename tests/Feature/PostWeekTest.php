@@ -3,6 +3,7 @@
 use App\Enums\AiCapability;
 use App\Models\AiModel;
 use App\Models\AiProvider;
+use App\Models\Persona;
 use App\Models\Update;
 use App\Models\User;
 use Illuminate\Http\Client\Request as ClientRequest;
@@ -24,7 +25,7 @@ test('a user generates five linkedin drafts', function () {
         'choices' => [['message' => ['content' => 'A generated post.']]],
     ])]);
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
 
     $this->actingAs($user)->post(route('posts.week'))->assertRedirect(route('posts.index'));
 
@@ -38,7 +39,7 @@ test('the week draws on recent updates', function () {
         'choices' => [['message' => ['content' => 'Post']]],
     ])]);
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     Update::factory()->for($user)->create(['body' => 'WEEK-CONTEXT-SEED']);
 
     $this->actingAs($user)->post(route('posts.week'));
@@ -52,7 +53,7 @@ test('a week can be generated without any updates', function () {
         'choices' => [['message' => ['content' => 'Evergreen post']]],
     ])]);
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
 
     $this->actingAs($user)->post(route('posts.week'))->assertRedirect(route('posts.index'));
 
@@ -62,7 +63,7 @@ test('a week can be generated without any updates', function () {
 test('a failed week creates nothing', function () {
     Http::fake();
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
 
     $this->actingAs($user)
         ->from(route('posts.index'))

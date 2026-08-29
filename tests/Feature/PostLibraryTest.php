@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Persona;
 use App\Models\Post;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia;
@@ -9,7 +10,7 @@ test('guests cannot view the post library', function () {
 });
 
 test('the library lists only the user\'s drafts newest first', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     Post::factory()->for($user)->create(['body' => 'Older draft', 'created_at' => now()->subMinute()]);
     Post::factory()->for($user)->create(['body' => 'Newer draft', 'created_at' => now()]);
     Post::factory()->for(User::factory())->create(['body' => 'Someone else']);
@@ -26,7 +27,7 @@ test('the library lists only the user\'s drafts newest first', function () {
 });
 
 test('a user can delete their own draft', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for($user)->create();
 
     $this->actingAs($user)
@@ -37,7 +38,7 @@ test('a user can delete their own draft', function () {
 });
 
 test('a user cannot delete another user\'s draft', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for(User::factory())->create();
 
     $this->actingAs($user)

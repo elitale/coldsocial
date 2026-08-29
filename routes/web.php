@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Controllers\PersonaController;
-use App\Http\Middleware\EnsurePersonaIsComplete;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UpdateController;
+use App\Http\Middleware\EnsurePersonaIsComplete;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 

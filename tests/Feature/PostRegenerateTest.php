@@ -3,6 +3,7 @@
 use App\Enums\AiCapability;
 use App\Models\AiModel;
 use App\Models\AiProvider;
+use App\Models\Persona;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Client\Request as ClientRequest;
@@ -27,7 +28,7 @@ test('a user regenerates their draft from an instruction', function () {
         'choices' => [['message' => ['content' => 'Shorter revised post.']]],
     ])]);
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for($user)->create(['body' => 'Original long post body.']);
 
     $this->actingAs($user)
@@ -43,7 +44,7 @@ test('the instruction and current body are sent to the model', function () {
         'choices' => [['message' => ['content' => 'Revised.']]],
     ])]);
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for($user)->create(['body' => 'BODY-SEED']);
 
     $this->actingAs($user)->post(route('posts.regenerate', $post), ['instruction' => 'INSTRUCTION-SEED']);
@@ -56,7 +57,7 @@ test('the instruction is required', function () {
     seedTextModelForRewrite();
     Http::fake();
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for($user)->create(['body' => 'Original']);
 
     $this->actingAs($user)
@@ -71,7 +72,7 @@ test('the instruction is required', function () {
 test('regenerate fails gracefully when no text model is configured', function () {
     Http::fake();
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for($user)->create(['body' => 'Original']);
 
     $this->actingAs($user)
@@ -87,7 +88,7 @@ test('a user cannot regenerate another user\'s draft', function () {
     seedTextModelForRewrite();
     Http::fake();
 
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for(User::factory())->create(['body' => 'Not yours']);
 
     $this->actingAs($user)

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Persona;
 use App\Models\Post;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia;
@@ -11,7 +12,7 @@ test('guests cannot edit a draft', function () {
 });
 
 test('a user sees the edit form pre-filled with their draft', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for($user)->create(['body' => 'Original body']);
 
     $this->actingAs($user)->get(route('posts.edit', $post))
@@ -23,7 +24,7 @@ test('a user sees the edit form pre-filled with their draft', function () {
 });
 
 test('a user can update their draft body', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for($user)->create(['body' => 'Original body']);
 
     $this->actingAs($user)
@@ -34,7 +35,7 @@ test('a user can update their draft body', function () {
 });
 
 test('the body is required when updating', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for($user)->create(['body' => 'Original body']);
 
     $this->actingAs($user)
@@ -46,7 +47,7 @@ test('the body is required when updating', function () {
 });
 
 test('a user cannot edit or update another user\'s draft', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Persona::factory())->create();
     $post = Post::factory()->for(User::factory())->create(['body' => 'Not yours']);
 
     $this->actingAs($user)->get(route('posts.edit', $post))->assertForbidden();
