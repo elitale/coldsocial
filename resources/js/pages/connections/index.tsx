@@ -1,11 +1,26 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 
 import { PlatformIcon } from '@/components/platform-icon';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { index as connectionsIndex, redirect } from '@/routes/connections';
+import {
+    index as connectionsIndex,
+    destroy,
+    redirect,
+} from '@/routes/connections';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -28,7 +43,42 @@ interface ConnectionsProps {
 
 function ConnectionAction({ platform }: { platform: PlatformCard }) {
     if (platform.status === 'connected') {
-        return <Badge>Connected</Badge>;
+        return (
+            <div className="flex items-center gap-2">
+                <Badge>Connected</Badge>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                            Disconnect
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                Disconnect {platform.label}?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                coldsocial won’t be able to publish to{' '}
+                                {platform.label} until you reconnect.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={() =>
+                                    router.delete(
+                                        destroy({ platform: platform.key }).url,
+                                        { preserveScroll: true },
+                                    )
+                                }
+                            >
+                                Disconnect
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
+        );
     }
 
     if (platform.status === 'available') {

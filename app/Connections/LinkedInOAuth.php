@@ -13,6 +13,8 @@ class LinkedInOAuth
 
     private const USERINFO_URL = 'https://api.linkedin.com/v2/userinfo';
 
+    private const REVOKE_URL = 'https://www.linkedin.com/oauth/v2/revoke';
+
     /**
      * @var list<string>
      */
@@ -60,5 +62,17 @@ class LinkedInOAuth
             'expires_at' => isset($token['expires_in']) ? Carbon::now()->addSeconds((int) $token['expires_in']) : null,
             'scopes' => implode(' ', self::SCOPES),
         ];
+    }
+
+    /**
+     * Revoke an access token at LinkedIn. Throws on failure (the caller decides).
+     */
+    public function revoke(string $token): void
+    {
+        Http::asForm()->post(self::REVOKE_URL, [
+            'client_id' => (string) config('services.linkedin.client_id'),
+            'client_secret' => (string) config('services.linkedin.client_secret'),
+            'token' => $token,
+        ])->throw();
     }
 }

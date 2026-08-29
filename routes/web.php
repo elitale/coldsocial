@@ -36,6 +36,7 @@ Route::middleware(['auth', 'verified', EnsurePersonaIsComplete::class])->group(f
     Route::get('connections', [ConnectionController::class, 'index'])->name('connections.index');
     Route::get('connections/{platform}/redirect', [ConnectionController::class, 'redirect'])->name('connections.redirect');
     Route::get('connections/{platform}/callback', [ConnectionController::class, 'callback'])->name('connections.callback');
+    Route::delete('connections/{platform}', [ConnectionController::class, 'destroy'])->name('connections.destroy');
 });
 
 require __DIR__.'/settings.php';
